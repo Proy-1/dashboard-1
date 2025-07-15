@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - E-Commerce Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="assets/css/login.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#4e73df',
+                            600: '#224abe',
+                            700: '#1d4ed8'
+                        }
+                    },
+                    fontFamily: {
+                        'nunito': ['Nunito', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="login-container fade-in">
+        <div class="login-header">
+            <i class="fas fa-store"></i>
+            <h2>Admin Dashboard</h2>
+            <p>E-Commerce Management</p>
+        </div>
+        
+        <div class="login-form">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email" class="form-label">
+                        <i class="fas fa-envelope"></i>Email
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        class="form-control" 
+                        placeholder="name@example.com" 
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock"></i>Password
+                    </label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-control" 
+                        placeholder="Password" 
+                        required
+                    >
+                </div>
+                
+                <div class="checkbox-container">
+                    <input 
+                        type="checkbox" 
+                        id="rememberMe" 
+                        class="form-checkbox"
+                    >
+                    <label for="rememberMe" class="checkbox-label">
+                        Ingat saya
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Masuk ke Dashboard
+                </button>
+            </form>
+            
+            <div class="demo-credentials">
+                <div class="demo-credentials-title">
+                    <i class="fas fa-info-circle"></i>Admin Credentials:
+                </div>
+                <div class="demo-credential-item">
+                    <span class="demo-credential-label">Email:</span> superadmin@company.com
+                </div>
+                <div class="demo-credential-item">
+                    <span class="demo-credential-label">Password:</span> SuperSecure123!
+                </div>
+            </div>
+            
+            <div class="login-footer" style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #6b7280; font-size: 14px;">
+                    Belum punya akun admin? 
+                    <a href="register.html" class="text-primary-600 hover:underline font-semibold">Daftar di sini</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Show loading state
+            const submitButton = document.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            submitButton.disabled = true;
+            
+            try {
+                // Try MongoDB authentication first
+                if (typeof apiService !== 'undefined') {
+                    const result = await apiService.loginAdmin(email, password);
+                    
+                    if (result.success) {
+                        // Set login session
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userEmail', email);
+                        
+                        // Redirect to dashboard
+                        window.location.href = 'index.html';
+                        return;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } else {
+                    // Fallback to demo authentication if API service not available
+                    if (email === 'superadmin@company.com' && password === 'SuperSecure123!') {
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userEmail', email);
+                        window.location.href = 'index.html';
+                        return;
+                    } else {
+                        throw new Error('Email atau password salah!');
+                    }
+                }
+            } catch (error) {
+                showError(error.message || 'Login gagal. Silakan coba lagi.');
+            } finally {
+                // Reset button state
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }
+        });
+        
+        function showError(message) {
+            // Remove existing alerts
+            const existingAlert = document.querySelector('.alert-error');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            // Create alert
+            const alert = document.createElement('div');
+            alert.className = 'alert-error bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mt-4 relative';
+            alert.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span>${message}</span>
+                    <button type="button" class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Insert after form
+            const form = document.getElementById('loginForm');
+            form.parentNode.insertBefore(alert, form.nextSibling);
+        }
+        
+        // Check if already logged in
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
+    
+    <!-- Load API Service for authentication -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api-service.js"></script>
+</body>
+</html>

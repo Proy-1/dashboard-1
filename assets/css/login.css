@@ -1,0 +1,394 @@
+/* ========================================
+   Login Page Styles
+   E-Commerce Admin Dashboard
+======================================== */
+
+/* Tailwind Configuration for Login */
+:root {
+    /* Primary Colors */
+    --primary-50: #eff6ff;
+    --primary-500: #4e73df;
+    --primary-600: #224abe;
+    --primary-700: #1d4ed8;
+}
+
+/* Base Styles */
+body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #9068cd 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ========================================
+   LOGIN CONTAINER STYLES
+======================================== */
+
+.login-container {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    width: 100%;
+    max-width: 28rem;
+    margin: 1rem;
+}
+
+.login-header {
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+    color: white;
+    text-align: center;
+    padding: 3rem;
+}
+
+.login-header i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.login-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.login-header p {
+    opacity: 0.75;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* ========================================
+   FORM STYLES
+======================================== */
+
+.login-form {
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.form-label i {
+    margin-right: 0.5rem;
+    color: #6b7280;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+}
+
+.form-control::placeholder {
+    color: #9ca3af;
+}
+
+/* ========================================
+   CHECKBOX STYLES
+======================================== */
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-checkbox {
+    width: 1rem;
+    height: 1rem;
+    color: var(--primary-500);
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    margin-right: 0.5rem;
+}
+
+.form-checkbox:focus {
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+}
+
+.checkbox-label {
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+}
+
+/* ========================================
+   BUTTON STYLES
+======================================== */
+
+.btn-login {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-login:hover {
+    background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(78, 115, 223, 0.3);
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+.btn-login i {
+    margin-right: 0.5rem;
+}
+
+/* ========================================
+   DEMO CREDENTIALS STYLES
+======================================== */
+
+.demo-credentials {
+    background: #f9fafb;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.demo-credentials-title {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.demo-credentials-title i {
+    margin-right: 0.25rem;
+    color: #3b82f6;
+}
+
+.demo-credential-item {
+    margin-bottom: 0.25rem;
+}
+
+.demo-credential-item:last-child {
+    margin-bottom: 0;
+}
+
+.demo-credential-label {
+    font-weight: 600;
+    color: #374151;
+}
+
+/* ========================================
+   ALERT STYLES
+======================================== */
+
+.alert-error {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    animation: slideDown 0.3s ease-out;
+}
+
+.alert-error i {
+    margin-right: 0.5rem;
+    color: #dc2626;
+}
+
+.alert-close {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: #991b1b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.alert-close:hover {
+    color: #7f1d1d;
+    background: rgba(220, 38, 38, 0.1);
+}
+
+/* ========================================
+   ANIMATIONS
+======================================== */
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* ========================================
+   RESPONSIVE STYLES
+======================================== */
+
+@media (max-width: 640px) {
+    .login-container {
+        margin: 0.5rem;
+        max-width: 100%;
+    }
+    
+    .login-header {
+        padding: 2rem;
+    }
+    
+    .login-header i {
+        font-size: 3rem;
+    }
+    
+    .login-header h2 {
+        font-size: 1.25rem;
+    }
+    
+    .login-form {
+        padding: 1.5rem;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+    }
+    
+    .btn-login {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 0.5rem;
+    }
+    
+    .login-header {
+        padding: 1.5rem;
+    }
+    
+    .login-form {
+        padding: 1rem;
+    }
+    
+    .demo-credentials {
+        font-size: 0.8rem;
+    }
+}
+
+/* ========================================
+   LOADING STATES
+======================================== */
+
+.btn-login.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.btn-login.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1rem;
+    height: 1rem;
+    margin: -0.5rem 0 0 -0.5rem;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
+   FOCUS STYLES FOR ACCESSIBILITY
+======================================== */
+
+.form-control:focus,
+.form-checkbox:focus,
+.btn-login:focus,
+.alert-close:focus {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
+}
+
+/* ========================================
+   PRINT STYLES
+======================================== */
+
+@media print {
+    .login-container {
+        box-shadow: none;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .btn-login {
+        background: #4e73df !important;
+        color: white !important;
+    }
+}

@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin E-Commerce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="assets/css/dashboard.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#4e73df',
+                            600: '#224abe',
+                            700: '#1d4ed8'
+                        },
+                        success: {
+                            500: '#1cc88a',
+                            600: '#17a673'
+                        },
+                        warning: {
+                            500: '#f6c23e',
+                            600: '#f4b619'
+                        },
+                        danger: {
+                            500: '#e74a3b',
+                            600: '#e02424'
+                        },
+                        info: {
+                            500: '#36b9cc',
+                            600: '#2c9faf'
+                        },
+                        gray: {
+                            800: '#5a5c69',
+                            300: '#dddfeb'
+                        }
+                    },
+                    fontFamily: {
+                        'nunito': ['Nunito', 'sans-serif']
+                    },
+                    width: {
+                        'sidebar': '250px'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-nunito">
+    <!-- Sidebar -->
+    <nav class="sidebar fixed top-0 left-0 h-screen w-sidebar bg-gradient-to-b from-primary-500 to-primary-700 z-50 transition-all duration-300 overflow-y-auto" id="sidebar">
+        <div class="p-6 border-b border-white border-opacity-10">
+            <h4 class="text-white font-bold text-lg">
+                <i class="fas fa-store mr-2"></i>E-Commerce Admin
+            </h4>
+        </div>
+        
+        <ul class="flex flex-col py-4">
+            <li>
+                <a href="#" data-page="dashboard" class="nav-link active flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                    <i class="fas fa-chart-pie mr-3 w-4 text-center"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="products" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                    <i class="fas fa-box mr-3 w-4 text-center"></i>
+                    Manajemen Produk & Harga
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="orders" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                    <i class="fas fa-shopping-cart mr-3 w-4 text-center"></i>
+                    Pesanan
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="customers" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                    <i class="fas fa-users mr-3 w-4 text-center"></i>
+                    Pelanggan
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="website" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                    <i class="fas fa-globe mr-3 w-4 text-center"></i>
+                    Manajemen Website
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="analytics" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                    <i class="fas fa-chart-bar mr-3 w-4 text-center"></i>
+                    Analitik
+                </a>
+            </li>
+            <li>
+                <a href="#" data-page="settings" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                    <i class="fas fa-cog mr-3 w-4 text-center"></i>
+                    Pengaturan
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content ml-sidebar transition-all duration-300">
+        <!-- Top Navigation -->
+        <nav class="bg-white border-b border-gray-200 shadow-sm">
+            <div class="px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center">
+                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none mr-3" id="sidebarToggle">
+                        <i class="fas fa-bars text-lg"></i>
+                    </button>
+                    <div id="backend-status" class="ml-4">
+                        <!-- Backend status will be inserted here -->
+                    </div>
+                    <button onclick="refreshBackendStatus()" class="ml-2 text-sm text-blue-600 hover:text-blue-800" title="Refresh Backend Status">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                
+                <div class="relative">
+                    <div class="dropdown">
+                        <button class="flex items-center text-gray-700 hover:text-gray-900 focus:outline-none" type="button" id="dropdownMenuButton" onclick="toggleDropdown()">
+                            <i class="fas fa-user-circle mr-2"></i>
+                            <span>Admin</span>
+                            <i class="fas fa-chevron-down ml-2 text-sm"></i>
+                        </button>
+                        <div class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50" id="dropdownMenu">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                                <i class="fas fa-user mr-2"></i>Profil
+                            </a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                                <i class="fas fa-cog mr-2"></i>Pengaturan
+                            </a>
+                            <hr class="border-gray-200 my-1">
+                            <a href="#" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Keluar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="p-6">
+            <!-- Dashboard Overview -->
+            <div id="dashboard-page" class="page-content active">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Dashboard Overview</h2>
+                    <p class="text-gray-600">Selamat datang di dashboard admin e-commerce</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-primary-500 p-6 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-xs font-bold text-primary-500 uppercase mb-1">Total Produk</div>
+                                <div id="total-products" class="text-2xl font-bold text-gray-800">0</div>
+                            </div>
+                            <div class="text-gray-300">
+                                <i class="fas fa-box text-3xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-success-500 p-6 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-xs font-bold text-success-500 uppercase mb-1">Total Pesanan</div>
+                                <div id="total-orders" class="text-2xl font-bold text-gray-800">0</div>
+                            </div>
+                            <div class="text-gray-300">
+                                <i class="fas fa-shopping-cart text-3xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-info-500 p-6 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-xs font-bold text-info-500 uppercase mb-1">Total Pendapatan</div>
+                                <div id="total-revenue" class="text-2xl font-bold text-gray-800">Rp 0</div>
+                            </div>
+                            <div class="text-gray-300">
+                                <i class="fas fa-dollar-sign text-3xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-warning-500 p-6 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-xs font-bold text-warning-500 uppercase mb-1">Total Pelanggan</div>
+                                <div id="total-customers" class="text-2xl font-bold text-gray-800">0</div>
+                            </div>
+                            <div class="text-gray-300">
+                                <i class="fas fa-users text-3xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions and Recent Activity -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h6 class="font-bold text-primary-500 text-lg">Aksi Cepat</h6>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-3">
+                                <button onclick="showPage('products')" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 transform hover:scale-105">
+                                    <i class="fas fa-plus mr-2"></i>Tambah Produk Baru
+                                </button>
+                                <button onclick="showPage('orders')" class="w-full bg-success-500 hover:bg-success-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 transform hover:scale-105">
+                                    <i class="fas fa-eye mr-2"></i>Lihat Pesanan Baru
+                                </button>
+                                <button onclick="showPage('website')" class="w-full bg-info-500 hover:bg-info-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 transform hover:scale-105">
+                                    <i class="fas fa-edit mr-2"></i>Update Konten Website
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+                        <div class="p-6 border-b border-gray-200">
+                            <h6 class="font-bold text-primary-500 text-lg">Aktivitas Terbaru</h6>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h6 class="font-medium text-gray-800">Produk baru ditambahkan</h6>
+                                        <small class="text-gray-500">5 menit lalu</small>
+                                    </div>
+                                    <p class="text-gray-600 text-sm">iPhone 15 Pro Max berhasil ditambahkan</p>
+                                </div>
+                                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h6 class="font-medium text-gray-800">Pesanan baru</h6>
+                                        <small class="text-gray-500">10 menit lalu</small>
+                                    </div>
+                                    <p class="text-gray-600 text-sm">Pesanan #12345 dari John Doe</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Management Page (dengan Manajemen Harga Terintegrasi) -->
+            <div id="products-page" class="page-content">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Manajemen Produk & Harga</h2>
+                    <p class="text-gray-600">Kelola produk dan harga dalam satu tempat</p>
+                    <div class="mt-4">
+                        <button onclick="showAddProductModal()" class="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-plus mr-2"></i>Tambah Produk Baru
+                        </button>
+                        <button onclick="refreshProducts()" class="ml-2 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-sync-alt mr-2"></i>Refresh
+                        </button>
+                        <button onclick="toggleBulkPricing()" class="ml-2 bg-warning-500 hover:bg-warning-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-calculator mr-2"></i>Update Harga Bulk
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bulk Pricing Panel (Hidden by default) -->
+                <div id="bulk-pricing-panel" class="bg-white rounded-xl shadow-sm mb-6" style="display: none;">
+                    <div class="p-6 border-b border-gray-200">
+                        <h6 class="font-bold text-warning-500 text-lg">Update Harga Secara Bulk</h6>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                                <select id="bulk-category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <option value="">Semua Produk</option>
+                                    <option value="smartphone">Smartphone</option>
+                                    <option value="laptop">Laptop</option>
+                                    <option value="accessories">Accessories</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Update</label>
+                                <select id="bulk-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <option value="percentage_increase">Naik Persentase</option>
+                                    <option value="percentage_decrease">Turun Persentase</option>
+                                    <option value="fixed_amount">Nilai Tetap</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nilai (%)</label>
+                                <input type="number" id="bulk-value" placeholder="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            </div>
+                            <div class="flex items-end">
+                                <button onclick="applyBulkPricing()" class="w-full bg-warning-500 hover:bg-warning-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                    <i class="fas fa-calculator mr-2"></i>Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm">
+                    <div class="p-6 border-b border-gray-200">
+                        <h6 class="font-bold text-primary-500 text-lg">Daftar Produk</h6>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="text-center py-3 px-4 font-semibold text-sm text-gray-700">No</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Produk</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Harga</th>
+                                        <th class="text-center py-3 px-4 font-semibold text-sm text-gray-700">Status</th>
+                                        <th class="text-center py-3 px-4 font-semibold text-sm text-gray-700">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="products-table-body">
+                                    <!-- Products akan dimuat dari backend melalui API service -->
+                                    <tr>
+                                        <td colspan="5" class="text-center py-8">
+                                            <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
+                                            <p class="mt-2 text-gray-500">Memuat data produk...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Website Management Page -->
+            <div id="website-page" class="page-content">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Manajemen Website</h2>
+                    <p class="text-gray-600">Kelola konten dan fitur website e-commerce</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm">
+                            <div class="p-6 border-b border-gray-200">
+                                <h6 class="font-bold text-primary-500 text-lg">Konten Homepage</h6>
+                            </div>
+                            <div class="p-6">
+                                <form>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Judul Utama</label>
+                                        <input type="text" value="Selamat Datang di Toko Online Kami" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                                        <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">Temukan produk berkualitas dengan harga terbaik hanya di sini!</textarea>
+                                    </div>
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Banner Utama</label>
+                                        <input type="file" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <button type="submit" class="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                        <i class="fas fa-save mr-2"></i>Simpan Konten
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm">
+                            <div class="p-6 border-b border-gray-200">
+                                <h6 class="font-bold text-primary-500 text-lg">Informasi Toko</h6>
+                            </div>
+                            <div class="p-6">
+                                <form>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Toko</label>
+                                        <input type="text" value="E-Commerce Store" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Alamat</label>
+                                        <textarea rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">Jl. Contoh No. 123, Jakarta</textarea>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Telepon</label>
+                                        <input type="tel" value="+62 21 1234 5678" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                        <input type="email" value="info@store.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <button type="submit" class="bg-success-500 hover:bg-success-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                        <i class="fas fa-save mr-2"></i>Update Info
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm">
+                            <div class="p-6 border-b border-gray-200">
+                                <h6 class="font-bold text-primary-500 text-lg">Fitur Website</h6>
+                            </div>
+                            <div class="p-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="livechat" checked class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                        <label for="livechat" class="ml-2 text-sm text-gray-700">Live Chat</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="wishlist" checked class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                        <label for="wishlist" class="ml-2 text-sm text-gray-700">Wishlist</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="reviews" class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                        <label for="reviews" class="ml-2 text-sm text-gray-700">Review Produk</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="newsletter" checked class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                        <label for="newsletter" class="ml-2 text-sm text-gray-700">Newsletter</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="payment" checked class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                        <label for="payment" class="ml-2 text-sm text-gray-700">Pembayaran Online</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="cod" class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                        <label for="cod" class="ml-2 text-sm text-gray-700">COD</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="tracking" checked class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                        <label for="tracking" class="ml-2 text-sm text-gray-700">Tracking Order</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="multilang" class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                        <label for="multilang" class="ml-2 text-sm text-gray-700">Multi Bahasa</label>
+                                    </div>
+                                </div>
+                                <button class="w-full mt-6 bg-info-500 hover:bg-info-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                    <i class="fas fa-cog mr-2"></i>Update Fitur
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm">
+                            <div class="p-6 border-b border-gray-200">
+                                <h6 class="font-bold text-primary-500 text-lg">SEO Settings</h6>
+                            </div>
+                            <div class="p-6">
+                                <form>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Meta Title</label>
+                                        <input type="text" value="E-Commerce Store - Belanja Online Terpercaya" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Meta Description</label>
+                                        <textarea rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">Toko online terpercaya dengan berbagai produk berkualitas</textarea>
+                                    </div>
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Keywords</label>
+                                        <input type="text" value="online shop, e-commerce, belanja online" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <button type="submit" class="bg-warning-500 hover:bg-warning-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                        <i class="fas fa-search mr-2"></i>Update SEO
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Management Page -->
+            <div id="orders-page" class="page-content">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Manajemen Pesanan</h2>
+                    <p class="text-gray-600">Kelola dan monitor semua pesanan pelanggan</p>
+                </div>
+
+                <!-- Order Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-info-500 p-6">
+                        <div class="text-xs font-bold text-info-500 uppercase mb-1">Pesanan Baru</div>
+                        <div class="text-2xl font-bold text-gray-800">12</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-warning-500 p-6">
+                        <div class="text-xs font-bold text-warning-500 uppercase mb-1">Dalam Proses</div>
+                        <div class="text-2xl font-bold text-gray-800">25</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-primary-500 p-6">
+                        <div class="text-xs font-bold text-primary-500 uppercase mb-1">Dikirim</div>
+                        <div class="text-2xl font-bold text-gray-800">43</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-success-500 p-6">
+                        <div class="text-xs font-bold text-success-500 uppercase mb-1">Selesai</div>
+                        <div class="text-2xl font-bold text-gray-800">156</div>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="bg-white rounded-xl shadow-sm">
+                    <div class="p-6 border-b border-gray-200">
+                        <h6 class="font-bold text-primary-500 text-lg">Daftar Pesanan</h6>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">ID Pesanan</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Pelanggan</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Produk</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Total</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Status</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Tanggal</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                        <td class="py-3 px-4 text-sm font-medium">#12345</td>
+                                        <td class="py-3 px-4 text-sm">John Doe</td>
+                                        <td class="py-3 px-4 text-sm">iPhone 15 Pro Max</td>
+                                        <td class="py-3 px-4 text-sm">Rp 20.999.000</td>
+                                        <td class="py-3 px-4">
+                                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Dalam Proses</span>
+                                        </td>
+                                        <td class="py-3 px-4 text-sm">2025-07-05</td>
+                                        <td class="py-3 px-4">
+                                            <button onclick="viewOrder('12345')" class="text-info-600 hover:text-info-800 mr-2">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button onclick="updateOrderStatus('12345')" class="text-success-600 hover:text-success-800">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                        <td class="py-3 px-4 text-sm font-medium">#12346</td>
+                                        <td class="py-3 px-4 text-sm">Jane Smith</td>
+                                        <td class="py-3 px-4 text-sm">Samsung Galaxy S24 Ultra</td>
+                                        <td class="py-3 px-4 text-sm">Rp 18.999.000</td>
+                                        <td class="py-3 px-4">
+                                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Dikirim</span>
+                                        </td>
+                                        <td class="py-3 px-4 text-sm">2025-07-05</td>
+                                        <td class="py-3 px-4">
+                                            <button onclick="viewOrder('12346')" class="text-info-600 hover:text-info-800 mr-2">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button onclick="updateOrderStatus('12346')" class="text-success-600 hover:text-success-800">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customers Management Page -->
+            <div id="customers-page" class="page-content">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Manajemen Pelanggan</h2>
+                    <p class="text-gray-600">Kelola data dan informasi pelanggan</p>
+                </div>
+
+                <!-- Customer Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-success-500 p-6">
+                        <div class="text-xs font-bold text-success-500 uppercase mb-1">Total Pelanggan</div>
+                        <div class="text-2xl font-bold text-gray-800">2,156</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-info-500 p-6">
+                        <div class="text-xs font-bold text-info-500 uppercase mb-1">Pelanggan Baru Bulan Ini</div>
+                        <div class="text-2xl font-bold text-gray-800">89</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border-l-4 border-warning-500 p-6">
+                        <div class="text-xs font-bold text-warning-500 uppercase mb-1">Pelanggan Aktif</div>
+                        <div class="text-2xl font-bold text-gray-800">1,432</div>
+                    </div>
+                </div>
+
+                <!-- Customers Table -->
+                <div class="bg-white rounded-xl shadow-sm">
+                    <div class="p-6 border-b border-gray-200">
+                        <h6 class="font-bold text-primary-500 text-lg">Daftar Pelanggan</h6>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">ID</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Nama</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Email</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Telepon</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Total Pesanan</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Status</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Bergabung</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                        <td class="py-3 px-4 text-sm">1</td>
+                                        <td class="py-3 px-4 text-sm font-medium">John Doe</td>
+                                        <td class="py-3 px-4 text-sm">john@example.com</td>
+                                        <td class="py-3 px-4 text-sm">+62 812 3456 7890</td>
+                                        <td class="py-3 px-4 text-sm">5 pesanan</td>
+                                        <td class="py-3 px-4">
+                                            <span class="bg-success-100 text-success-800 text-xs font-medium px-2.5 py-0.5 rounded">Aktif</span>
+                                        </td>
+                                        <td class="py-3 px-4 text-sm">2025-01-15</td>
+                                        <td class="py-3 px-4">
+                                            <button onclick="viewCustomer(1)" class="text-info-600 hover:text-info-800 mr-2">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button onclick="editCustomer(1)" class="text-warning-600 hover:text-warning-800">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                        <td class="py-3 px-4 text-sm">2</td>
+                                        <td class="py-3 px-4 text-sm font-medium">Jane Smith</td>
+                                        <td class="py-3 px-4 text-sm">jane@example.com</td>
+                                        <td class="py-3 px-4 text-sm">+62 813 4567 8901</td>
+                                        <td class="py-3 px-4 text-sm">3 pesanan</td>
+                                        <td class="py-3 px-4">
+                                            <span class="bg-success-100 text-success-800 text-xs font-medium px-2.5 py-0.5 rounded">Aktif</span>
+                                        </td>
+                                        <td class="py-3 px-4 text-sm">2025-02-20</td>
+                                        <td class="py-3 px-4">
+                                            <button onclick="viewCustomer(2)" class="text-info-600 hover:text-info-800 mr-2">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button onclick="editCustomer(2)" class="text-warning-600 hover:text-warning-800">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Page -->
+            <div id="analytics-page" class="page-content">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Analitik</h2>
+                    <p class="text-gray-600">Dashboard analitik dan laporan performa toko</p>
+                </div>
+
+                <!-- Analytics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-600">Pengunjung Hari Ini</div>
+                                <div class="text-2xl font-bold text-gray-800">1,234</div>
+                                <div class="text-sm text-green-600">↑ 12% dari kemarin</div>
+                            </div>
+                            <div class="text-primary-500">
+                                <i class="fas fa-users text-3xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-600">Conversion Rate</div>
+                                <div class="text-2xl font-bold text-gray-800">3.24%</div>
+                                <div class="text-sm text-green-600">↑ 0.5% dari kemarin</div>
+                            </div>
+                            <div class="text-success-500">
+                                <i class="fas fa-chart-line text-3xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-600">Rata-rata Order</div>
+                                <div class="text-2xl font-bold text-gray-800">Rp 450K</div>
+                                <div class="text-sm text-red-600">↓ 2% dari kemarin</div>
+                            </div>
+                            <div class="text-warning-500">
+                                <i class="fas fa-shopping-bag text-3xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm text-gray-600">Return Rate</div>
+                                <div class="text-2xl font-bold text-gray-800">1.2%</div>
+                                <div class="text-sm text-green-600">↓ 0.3% dari kemarin</div>
+                            </div>
+                            <div class="text-info-500">
+                                <i class="fas fa-undo text-3xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Placeholder -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h6 class="font-bold text-primary-500 text-lg">Penjualan 7 Hari Terakhir</h6>
+                        </div>
+                        <div class="p-6">
+                            <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+                                <div class="text-center text-gray-500">
+                                    <i class="fas fa-chart-bar text-4xl mb-2"></i>
+                                    <p>Chart akan ditampilkan di sini</p>
+                                    <p class="text-sm">Gunakan Chart.js atau library lainnya</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm">
+                        <div class="p-6 border-b border-gray-200">
+                            <h6 class="font-bold text-primary-500 text-lg">Produk Terlaris</h6>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-primary-500 text-white rounded-lg flex items-center justify-center font-bold">1</div>
+                                        <div class="ml-3">
+                                            <div class="font-medium">iPhone 15 Pro Max</div>
+                                            <div class="text-sm text-gray-600">156 terjual</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-green-600 font-medium">+23%</div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-success-500 text-white rounded-lg flex items-center justify-center font-bold">2</div>
+                                        <div class="ml-3">
+                                            <div class="font-medium">Samsung Galaxy S24</div>
+                                            <div class="text-sm text-gray-600">132 terjual</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-green-600 font-medium">+18%</div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-warning-500 text-white rounded-lg flex items-center justify-center font-bold">3</div>
+                                        <div class="ml-3">
+                                            <div class="font-medium">MacBook Pro M3</div>
+                                            <div class="text-sm text-gray-600">98 terjual</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-green-600 font-medium">+15%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings-page" class="page-content">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Pengaturan</h2>
+                    <p class="text-gray-600">Kelola pengaturan akun dan sistem</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm">
+                            <div class="p-6 border-b border-gray-200">
+                                <h6 class="font-bold text-primary-500 text-lg">Pengaturan Akun</h6>
+                            </div>
+                            <div class="p-6">
+                                <form>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                                        <input type="text" value="Administrator" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                        <input type="email" value="superadmin@company.com" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Password Baru</label>
+                                        <input type="password" placeholder="Kosongkan jika tidak ingin mengubah" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password</label>
+                                        <input type="password" placeholder="Konfirmasi password baru" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <button type="submit" class="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                        <i class="fas fa-save mr-2"></i>Simpan Perubahan
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm">
+                            <div class="p-6 border-b border-gray-200">
+                                <h6 class="font-bold text-primary-500 text-lg">Notifikasi</h6>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium">Email Notifikasi</div>
+                                            <div class="text-sm text-gray-600">Terima notifikasi pesanan baru via email</div>
+                                        </div>
+                                        <input type="checkbox" checked class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium">Push Notifikasi</div>
+                                            <div class="text-sm text-gray-600">Notifikasi real-time di browser</div>
+                                        </div>
+                                        <input type="checkbox" class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="font-medium">Laporan Harian</div>
+                                            <div class="text-sm text-gray-600">Terima ringkasan harian via email</div>
+                                        </div>
+                                        <input type="checkbox" checked class="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm">
+                            <div class="p-6 border-b border-gray-200">
+                                <h6 class="font-bold text-primary-500 text-lg">Pengaturan Sistem</h6>
+                            </div>
+                            <div class="p-6">
+                                <form>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Zona Waktu</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option>UTC+7 (WIB)</option>
+                                            <option>UTC+8 (WITA)</option>
+                                            <option>UTC+9 (WIT)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Mata Uang</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option>IDR (Rupiah)</option>
+                                            <option>USD (Dollar)</option>
+                                            <option>EUR (Euro)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Bahasa</label>
+                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option>Bahasa Indonesia</option>
+                                            <option>English</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="bg-success-500 hover:bg-success-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                        <i class="fas fa-cog mr-2"></i>Update Sistem
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm">
+                            <div class="p-6 border-b border-gray-200">
+                                <h6 class="font-bold text-primary-500 text-lg">Backup & Restore</h6>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="font-medium mb-2">Backup Terakhir</div>
+                                        <div class="text-sm text-gray-600 mb-4">5 Juli 2025, 10:30 WIB</div>
+                                        <button class="bg-info-500 hover:bg-info-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 mr-2">
+                                            <i class="fas fa-download mr-2"></i>Backup Sekarang
+                                        </button>
+                                        <button class="bg-warning-500 hover:bg-warning-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                            <i class="fas fa-upload mr-2"></i>Restore Data
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="modal-title" class="modal-title">Tambah Produk Baru</h5>
+                <button onclick="hideModal('productModal')" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <input type="hidden" id="product-id" name="product_id">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="product-name" class="form-label">
+                                <i class="fas fa-tag mr-2"></i>Nama Produk
+                            </label>
+                            <input type="text" id="product-name" name="name" class="form-control" placeholder="Masukkan nama produk" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="product-price" class="form-label">
+                                <i class="fas fa-money-bill mr-2"></i>Harga (Rp)
+                            </label>
+                            <input type="number" id="product-price" name="price" class="form-control" placeholder="0" min="0" step="1000" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-description" class="form-label">
+                            <i class="fas fa-align-left mr-2"></i>Deskripsi Produk
+                        </label>
+                        <textarea id="product-description" name="description" rows="4" class="form-control" placeholder="Masukkan deskripsi produk" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-image" class="form-label">
+                            <i class="fas fa-image mr-2"></i>Upload Gambar
+                        </label>
+                        <div class="flex space-x-2">
+                            <input type="file" id="product-image" accept="image/*" class="form-control flex-1">
+                            <button type="button" onclick="uploadProductImageWrapper()" class="btn btn-primary" title="Upload gambar produk">
+                                <i class="fas fa-upload mr-1"></i>Upload
+                            </button>
+                        </div>
+                        <input type="hidden" id="product-image-url" name="image_url">
+                        <small class="text-gray-500 mt-1 block">Format: JPG, PNG, GIF (Max: 5MB)</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer flex justify-end space-x-3 pt-4 border-t">
+                <button type="button" onclick="hideModal('productModal')" class="btn bg-gray-500 text-white hover:bg-gray-600" title="Batalkan tambah produk">
+                    <i class="fas fa-times mr-1"></i>Batal
+                </button>
+                <button type="button" onclick="saveProductWrapper()" class="btn btn-primary" title="Simpan produk">
+                    <i class="fas fa-save mr-1"></i>Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api-service.js"></script>
+    <script src="assets/js/admin-script-tailwind.js"></script>
+</body>
+</html>
