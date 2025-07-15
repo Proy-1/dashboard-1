@@ -172,3 +172,57 @@ Jika mengalami masalah:
 2. Verify backend status di `http://localhost:5000/api/health`
 3. Ensure MongoDB service running
 4. Check CORS configuration jika ada cross-origin issues
+
+---
+
+## Cara Penggunaan Tailwind CSS di Repo Ini
+
+- Tailwind digunakan langsung dari CDN, sehingga Anda tidak perlu install atau build Tailwind secara manual.
+- Lihat di bagian `<head>` pada file HTML:
+  ```html
+  <script src="https://cdn.tailwindcss.com"></script>
+  ```
+- Anda bisa langsung menggunakan class Tailwind di HTML, misal:
+  ```html
+  <div class="bg-primary-500 text-white p-4 rounded-lg">Contoh Tailwind</div>
+  ```
+- Untuk custom warna dan font, konfigurasi dilakukan inline di HTML:
+  ```html
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: { ... } },
+          fontFamily: { 'nunito': ['Nunito', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  ```
+- Tidak perlu proses build, cukup edit HTML dan refresh browser.
+
+## Cara Menghubungkan Dashboard dengan Backend
+
+1. **Pastikan backend sudah berjalan** di `http://localhost:5000` (lihat instruksi setup di atas).
+2. **Konfigurasi endpoint backend** ada di file `assets/js/config.js`:
+   - Default: `BASE_URL: 'http://localhost:5000'`
+   - Jika backend berjalan di port/host lain, ubah di file tersebut.
+3. **Frontend akan otomatis terhubung** ke backend jika API backend aktif dan endpoint sesuai.
+4. **Login, register, CRUD produk, dan upload gambar** akan menggunakan API backend sesuai repo [Proy-1/back](https://github.com/Proy-1/back).
+5. **Troubleshooting:**
+   - Jika data tidak muncul, cek koneksi backend dan endpoint di browser console.
+   - Pastikan CORS backend mengizinkan akses dari frontend (lihat pengaturan CORS di backend).
+   - Untuk demo, gunakan kredensial yang tertera di halaman login.
+
+## FAQ
+
+- **Apakah perlu install Tailwind secara lokal?**
+  - Tidak, cukup gunakan CDN seperti di HTML.
+- **Bagaimana jika ingin custom Tailwind lebih lanjut?**
+  - Bisa build sendiri dengan Tailwind CLI, tapi untuk dashboard ini cukup CDN.
+- **Bagaimana jika backend berjalan di port lain?**
+  - Ubah `BASE_URL` di `assets/js/config.js`.
+- **Bagaimana cara cek koneksi backend?**
+  - Buka browser console, refresh dashboard, cek status API di Network tab.
+
+---
