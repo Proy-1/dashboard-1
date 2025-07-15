@@ -759,7 +759,7 @@ async function uploadProductImage() {
         }
 
         // Validate file size (5MB)
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 10 * 1024 * 1024; // 5MB
         if (file.size > maxSize) {
             console.error('❌ File too large:', file.size);
             if (typeof apiService !== 'undefined') {
