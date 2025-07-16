@@ -110,7 +110,7 @@ class APIService {
     // GET: Ambil semua produk
     async getProducts() {
         try {
-            const response = await fetch(`${this.baseURL}/products`);
+            const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCTS}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -127,32 +127,18 @@ class APIService {
     // GET: Ambil satu produk berdasarkan ID
     async getProduct(productId) {
         try {
-            console.log('📡 API call: GET', `${this.baseURL}/products/${productId}`);
-            const response = await fetch(`${this.baseURL}/products/${productId}`);
-            
-            console.log('📡 Response status:', response.status);
-            
+            const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCT_BY_ID(productId)}`);
             if (!response.ok) {
                 if (response.status === 404) {
-                    console.log('❌ Product not found (404)');
                     return null;
                 }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
             const product = await response.json();
-            console.log('✅ Product received:', product);
             return product;
         } catch (error) {
-            console.error('❌ Error fetching product:', error);
-            
-            // Check if it's a network error (backend not running)
-            if (error.message.includes('Failed to fetch') || error.message.includes('ERR_CONNECTION_REFUSED')) {
-                console.error('🔌 Backend seems to be offline');
-                this.showNotification('Backend tidak dapat dijangkau. Pastikan server berjalan di localhost:5000', 'error');
-            } else {
-                this.showNotification('Error mengambil data produk: ' + error.message, 'error');
-            }
+            console.error('Error fetching product:', error);
+            this.showNotification('Error mengambil data produk: ' + error.message, 'error');
             return null;
         }
     }
@@ -160,20 +146,17 @@ class APIService {
     // POST: Tambah produk baru
     async createProduct(productData) {
         try {
-            const response = await fetch(`${this.baseURL}/products`, {
+            const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCTS}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(productData)
             });
-
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
             const newProduct = await response.json();
-            console.log('✅ Product created:', newProduct);
             this.showNotification('Produk berhasil ditambahkan', 'success');
             return newProduct;
         } catch (error) {
@@ -186,20 +169,17 @@ class APIService {
     // PUT: Update produk
     async updateProduct(productId, productData) {
         try {
-            const response = await fetch(`${this.baseURL}/products/${productId}`, {
+            const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCT_BY_ID(productId)}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(productData)
             });
-
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
             const updatedProduct = await response.json();
-            console.log('✅ Product updated:', updatedProduct);
             this.showNotification('Produk berhasil diperbarui', 'success');
             return updatedProduct;
         } catch (error) {
@@ -212,16 +192,12 @@ class APIService {
     // DELETE: Hapus produk
     async deleteProduct(productId) {
         try {
-            const response = await fetch(`${this.baseURL}/products/${productId}`, {
-                method: 'DELETE'
+            const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCT_BY_ID(productId)}`, {
+                method: 'DELETE',
             });
-
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
-            const result = await response.json();
-            console.log('✅ Product deleted:', result);
             this.showNotification('Produk berhasil dihapus', 'success');
             return true;
         } catch (error) {
@@ -234,7 +210,7 @@ class APIService {
     // POST: Upload gambar
     async uploadImage(formData) {
         try {
-            const response = await fetch(`${this.baseURL}/upload`, {
+            const response = await fetch(`${this.baseURL}${this.endpoints.UPLOAD}`, {
                 method: 'POST',
                 body: formData
             });
@@ -261,7 +237,7 @@ class APIService {
     // POST: Login admin
     async loginAdmin(username, password) {
         try {
-            const response = await fetch(`${this.baseURL}/login`, {
+            const response = await fetch(`${this.baseURL}${this.endpoints.LOGIN}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -286,55 +262,80 @@ class APIService {
     // POST: Register admin
     async registerAdmin(adminData) {
         try {
-            // Backend only accepts username and password
-            const requestBody = {
-                username: adminData.email, // Use email as username
-                password: adminData.password
-            };
-
-            const response = await fetch(`${this.baseURL}/register`, {
+            const response = await fetch(`${this.baseURL}${this.endpoints.REGISTER}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(adminData)
             });
-
-            // Check if response is JSON
-            const contentType = response.headers.get('content-type');
-            let data;
-            
-            if (contentType && contentType.includes('application/json')) {
-                data = await response.json();
-            } else {
-                throw new Error(`Server error (HTTP ${response.status}). Pastikan backend berjalan dengan benar.`);
-            }
-
             if (!response.ok) {
-                throw new Error(data.error || data.message || `HTTP ${response.status}: Registrasi gagal`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-
-            console.log('✅ Admin registration successful');
-            return { 
-                success: true, 
-                message: data.message || 'Admin berhasil didaftarkan',
-                data: data.data || null
-            };
+            const result = await response.json();
+            this.showNotification('Registrasi admin berhasil', 'success');
+            return result;
         } catch (error) {
-            console.error('❌ Error during admin registration:', error.message);
-            
-            // Handle different types of errors
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                return { 
-                    success: false, 
-                    message: 'Tidak dapat terhubung ke server. Pastikan backend berjalan di ' + this.baseURL
-                };
+            console.error('Error registering admin:', error);
+            this.showNotification('Error registrasi admin', 'error');
+            return null;
+        }
+    }
+
+    // ADMIN: GET semua admin
+    async getAdmins() {
+        try {
+            const response = await fetch(`${this.baseURL}${this.endpoints.ADMINS}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            return { 
-                success: false, 
-                message: error.message || 'Gagal mendaftarkan admin. Silakan coba lagi.'
-            };
+            const admins = await response.json();
+            return admins;
+        } catch (error) {
+            console.error('Error fetching admins:', error);
+            this.showNotification('Error mengambil data admin', 'error');
+            return [];
+        }
+    }
+
+    // ADMIN: Tambah admin baru
+    async createAdmin(adminData) {
+        try {
+            const response = await fetch(`${this.baseURL}${this.endpoints.ADMINS}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(adminData)
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const newAdmin = await response.json();
+            this.showNotification('Admin berhasil ditambahkan', 'success');
+            return newAdmin;
+        } catch (error) {
+            console.error('Error creating admin:', error);
+            this.showNotification('Error menambahkan admin', 'error');
+            return null;
+        }
+    }
+
+    // ADMIN: Hapus admin
+    async deleteAdmin(adminId) {
+        try {
+            const response = await fetch(`${this.baseURL}${this.endpoints.ADMIN_BY_ID(adminId)}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            this.showNotification('Admin berhasil dihapus', 'success');
+            return true;
+        } catch (error) {
+            console.error('Error deleting admin:', error);
+            this.showNotification('Error menghapus admin', 'error');
+            return false;
         }
     }
 
@@ -508,7 +509,7 @@ class APIService {
     }
 
     // Update statistik di dashboard
-    updateDashboardStats(products) {
+    async updateDashboardStats(products) {
         // Total produk
         const totalProductsElement = document.getElementById('total-products');
         if (totalProductsElement) {
@@ -530,6 +531,27 @@ class APIService {
     updateCharts(products) {
         // Implementasi chart akan ditambahkan nanti jika diperlukan
         console.log('Charts updated with', products.length, 'products');
+    }
+
+    // STATS: Statistik produk & admin
+    async getStats() {
+        try {
+            const response = await fetch(`${this.baseURL}${this.endpoints.STATS}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const stats = await response.json();
+            return stats;
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+            this.showNotification('Error mengambil statistik', 'error');
+            return null;
+        }
+    }
+
+    // STATIC: Ambil gambar upload
+    getImageUrl(filename) {
+        return `${this.baseURL}${this.endpoints.STATIC_UPLOAD(filename)}`;
     }
 }
 

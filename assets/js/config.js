@@ -5,7 +5,7 @@
 
 // Backend configuration
 const BACKEND_CONFIG = {
-    // Base URL backend - sesuai dengan backend GitHub repo
+    // Base URL backend - sesuai dengan backend Go
     BASE_URL: 'http://localhost:5000',
     API_BASE_URL: 'http://localhost:5000/api',
     
@@ -49,23 +49,21 @@ BACKEND_CONFIG.API_BASE_URL = ENVIRONMENT.getBackendURL() + '/api';
 const API_ENDPOINTS = {
     // Health check
     HEALTH: '/health',
-    
-    // Authentication
-    LOGIN: '/login',
-    REGISTER: '/register',
-    
-    // Products
+    // Produk
     PRODUCTS: '/products',
     PRODUCT_BY_ID: (id) => `/products/${id}`,
-    
-    // Image upload
+    // Admin
+    ADMINS: '/admins',
+    ADMIN_BY_ID: (id) => `/admins/${id}`,
+    // Auth
+    LOGIN: '/login',
+    REGISTER: '/register',
+    // Upload
     UPLOAD: '/upload',
-    
-    // Future endpoints (placeholder)
-    ORDERS: '/orders',
-    CUSTOMERS: '/customers',
-    ANALYTICS: '/analytics',
-    SETTINGS: '/settings'
+    // Statistik
+    STATS: '/stats',
+    // Static file (gambar upload)
+    STATIC_UPLOAD: (filename) => `/static/uploads/${filename}`
 };
 
 // HTTP Headers
