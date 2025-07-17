@@ -153,15 +153,20 @@ class APIService {
                 },
                 body: JSON.stringify(productData)
             });
+
+            const result = await response.json();
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // Handle Golang backend error format
+                const errorMessage = result.error || 'Gagal menambahkan produk';
+                throw new Error(errorMessage);
             }
-            const newProduct = await response.json();
+
             this.showNotification('Produk berhasil ditambahkan', 'success');
-            return newProduct;
+            return result;
         } catch (error) {
             console.error('Error creating product:', error);
-            this.showNotification('Error menambahkan produk', 'error');
+            this.showNotification(error.message || 'Error menambahkan produk', 'error');
             return null;
         }
     }
@@ -195,14 +200,20 @@ class APIService {
             const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCT_BY_ID(productId)}`, {
                 method: 'DELETE',
             });
+
+            const result = await response.json();
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // Handle Golang backend error format
+                const errorMessage = result.error || 'Gagal menghapus produk';
+                throw new Error(errorMessage);
             }
-            this.showNotification('Produk berhasil dihapus', 'success');
+
+            this.showNotification(result.message || 'Produk berhasil dihapus', 'success');
             return true;
         } catch (error) {
             console.error('Error deleting product:', error);
-            this.showNotification('Error menghapus produk', 'error');
+            this.showNotification(error.message || 'Error menghapus produk', 'error');
             return false;
         }
     }
@@ -215,18 +226,26 @@ class APIService {
                 body: formData
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // Handle Golang backend error format
+                const errorMessage = result.error || 'Upload gagal';
+                throw new Error(errorMessage);
             }
 
-            const result = await response.json();
             console.log('✅ Image uploaded:', result);
             this.showNotification('Gambar berhasil diupload', 'success');
-            return result;
+            return {
+                success: true,
+                image_url: result.image_url,
+                file_size: result.file_size,
+                message: 'Upload berhasil'
+            };
         } catch (error) {
             console.error('Error uploading image:', error);
-            this.showNotification('Error mengupload gambar', 'error');
-            return null;
+            this.showNotification(error.message || 'Error mengupload gambar', 'error');
+            return { success: false, message: error.message };
         }
     }
 
@@ -248,11 +267,18 @@ class APIService {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Login gagal');
+                // Handle Golang backend error format
+                const errorMessage = data.error || 'Login gagal';
+                throw new Error(errorMessage);
             }
 
+            // Success response from Golang backend
             console.log('✅ Login successful');
-            return { success: true, message: data.message };
+            return { 
+                success: true, 
+                message: data.message || 'Login berhasil',
+                admin: data.admin || null 
+            };
         } catch (error) {
             console.error('Error during login:', error);
             return { success: false, message: error.message };
@@ -269,16 +295,28 @@ class APIService {
                 },
                 body: JSON.stringify(adminData)
             });
+
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // Handle Golang backend error format
+                const errorMessage = data.error || 'Registrasi gagal';
+                throw new Error(errorMessage);
             }
-            const result = await response.json();
-            this.showNotification('Registrasi admin berhasil', 'success');
-            return result;
+
+            this.showNotification(data.message || 'Registrasi admin berhasil', 'success');
+            return {
+                success: true,
+                admin: {
+                    _id: data._id,
+                    username: data.username
+                },
+                message: data.message
+            };
         } catch (error) {
             console.error('Error registering admin:', error);
-            this.showNotification('Error registrasi admin', 'error');
-            return null;
+            this.showNotification(error.message || 'Error registrasi admin', 'error');
+            return { success: false, message: error.message };
         }
     }
 
@@ -780,14 +818,14 @@ async function uploadProductImage() {
             return false;
         }
 
-        // Validate file size (5MB)
-        const maxSize = 10 * 1024 * 1024; // 5MB
+        // Validate file size (10MB - sesuai backend Go)
+        const maxSize = 10 * 1024 * 1024; // 10MB
         if (file.size > maxSize) {
             console.error('❌ File too large:', file.size);
             if (typeof apiService !== 'undefined') {
-                apiService.showNotification('Ukuran file terlalu besar. Maksimal 5MB', 'error');
+                apiService.showNotification('Ukuran file terlalu besar. Maksimal 10MB', 'error');
             } else {
-                alert('Ukuran file terlalu besar. Maksimal 5MB');
+                alert('Ukuran file terlalu besar. Maksimal 10MB');
             }
             return false;
         }
@@ -800,13 +838,15 @@ async function uploadProductImage() {
             formData.append('image', file);
 
             const result = await apiService.uploadImage(formData);
-            if (result && result.image_url) {
+            if (result && result.success && result.image_url) {
                 document.getElementById('product-image-url').value = result.image_url;
                 console.log('✅ Image uploaded successfully:', result.image_url);
-                apiService.showNotification('Gambar berhasil diupload', 'success');
+                if (result.file_size) {
+                    console.log('📏 File size:', result.file_size);
+                }
                 return true;
             } else {
-                console.error('❌ Upload failed - no image URL returned');
+                console.error('❌ Upload failed:', result ? result.message : 'No result');
                 return false;
             }
         } else {

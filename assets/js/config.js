@@ -16,8 +16,8 @@ const BACKEND_CONFIG = {
     MAX_RETRIES: 3,
     RETRY_DELAY: 1000, // 1 second
     
-    // File upload settings
-    MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
+    // File upload settings - sesuai dengan backend Go (10MB)
+    MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB (sesuai backend Go)
     ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'],
     
     // Cache settings
@@ -82,6 +82,10 @@ const ERROR_MESSAGES = {
     TIMEOUT: 'Permintaan timeout. Silakan coba lagi.',
     FILE_TOO_LARGE: `Ukuran file terlalu besar. Maksimal ${BACKEND_CONFIG.MAX_FILE_SIZE / 1024 / 1024}MB.`,
     INVALID_FILE_TYPE: 'Tipe file tidak didukung. Gunakan JPG, PNG, atau GIF.',
+    PRODUCT_NOT_FOUND: 'Produk tidak ditemukan',
+    ADMIN_NOT_FOUND: 'Admin tidak ditemukan',
+    USERNAME_EXISTS: 'Username sudah ada',
+    INVALID_CREDENTIALS: 'Username/password salah',
 };
 
 // Status messages
@@ -121,6 +125,24 @@ if (ENVIRONMENT.isDevelopment) {
     console.log('🔧 Backend Configuration:', {
         baseURL: BACKEND_CONFIG.BASE_URL,
         apiURL: BACKEND_CONFIG.API_BASE_URL,
-        environment: ENVIRONMENT.isDevelopment ? 'Development' : 'Production'
+        environment: ENVIRONMENT.isDevelopment ? 'Development' : 'Production',
+        backendType: 'Golang with Gin Framework',
+        database: 'MongoDB',
+        maxFileSize: '10MB'
     });
+    
+    // Quick backend check
+    fetch(BACKEND_CONFIG.BASE_URL + '/api/health')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                console.log('✅ Backend Golang is healthy:', data);
+            } else {
+                console.warn('⚠️ Backend responded but with issues:', data);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Backend not accessible:', error.message);
+            console.log('💡 Make sure Golang backend is running: go run main.go');
+        });
 }
