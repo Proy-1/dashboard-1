@@ -6,13 +6,19 @@
 class APIService {
     constructor() {
         // Use configuration from config.js
-        this.baseURL = window.BackendConfig?.BACKEND_CONFIG?.API_BASE_URL || 'http://localhost:5000/api';
-        this.config = window.BackendConfig?.BACKEND_CONFIG || {};
-        this.endpoints = window.BackendConfig?.API_ENDPOINTS || {};
-        this.messages = window.BackendConfig?.SUCCESS_MESSAGES || {};
-        this.errors = window.BackendConfig?.ERROR_MESSAGES || {};
+        this.baseURL = window.BACKEND_CONFIG?.host || `http://localhost:8000`;
+        this.config = window.BACKEND_CONFIG || {};
+        this.endpoints = window.API_ENDPOINTS || {};
         
         this.isConnected = false;
+        this.initialized = false;
+        
+        // Prevent multiple initialization
+        if (window.apiServiceInstance) {
+            return window.apiServiceInstance;
+        }
+        
+        window.apiServiceInstance = this;
         this.init();
     }
 
@@ -21,8 +27,7 @@ class APIService {
     ======================================== */
     
     async init() {
-        // Add delay to ensure DOM is ready
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        if (this.initialized) return;
         
         try {
             await this.healthCheck();
@@ -31,9 +36,11 @@ class APIService {
             this.showConnectionStatus(true);
         } catch (error) {
             this.isConnected = false;
-            console.error('❌ Backend connection failed:', error.message);
+            console.log('⚠️ Backend connection failed:', error.message);
             this.showConnectionStatus(false);
         }
+        
+        this.initialized = true;
     }
 
     async checkConnectionStatus() {
@@ -44,7 +51,10 @@ class APIService {
             return true;
         } catch (error) {
             this.isConnected = false;
-            console.error('Backend connection failed:', error.message);
+            // Only log error occasionally to avoid console spam
+            if (Math.random() < 0.1) { // 10% chance to log
+                console.warn('Backend connection check failed (normal for standalone mode):', error.message);
+            }
             this.showConnectionStatus(false);
             return false;
         }
