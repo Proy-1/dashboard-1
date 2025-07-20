@@ -4,57 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin E-Commerce</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="assets/css/dashboard.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#4e73df',
-                            600: '#224abe',
-                            700: '#1d4ed8'
-                        },
-                        success: {
-                            500: '#1cc88a',
-                            600: '#17a673'
-                        },
-                        warning: {
-                            500: '#f6c23e',
-                            600: '#f4b619'
-                        },
-                        danger: {
-                            500: '#e74a3b',
-                            600: '#e02424'
-                        },
-                        info: {
-                            500: '#36b9cc',
-                            600: '#2c9faf'
-                        },
-                        gray: {
-                            800: '#5a5c69',
-                            300: '#dddfeb'
-                        }
-                    },
-                    fontFamily: {
-                        'nunito': ['Nunito', 'sans-serif']
-                    },
-                    width: {
-                        'sidebar': '250px'
-                    }
-                }
-            }
+    <link href="assets/css/tailwind-local.css" rel="stylesheet">
+    <style>
+        /* Critical CSS untuk menghindari FOUC */
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+            opacity: 1;
         }
-    </script>
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background: linear-gradient(180deg, #4e73df, #1d4ed8);
+            z-index: 50;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+        
+        .page-content {
+            display: none;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
+        
+        /* Prevent flicker */
+        .loading {
+            visibility: hidden;
+        }
+        
+        .loaded {
+            visibility: visible;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-nunito">
+<body class="bg-gray-100 font-nunito loading">
     <!-- Sidebar -->
-    <nav class="sidebar fixed top-0 left-0 h-screen w-sidebar bg-gradient-to-b from-primary-500 to-primary-700 z-50 transition-all duration-300 overflow-y-auto" id="sidebar">
+    <nav class="sidebar" id="sidebar">
         <div class="p-6 border-b border-white border-opacity-10">
             <h4 class="text-white font-bold text-lg">
                 <i class="fas fa-store mr-2"></i>E-Commerce Admin
@@ -63,43 +65,43 @@
         
         <ul class="flex flex-col py-4">
             <li>
-                <a href="#" data-page="dashboard" class="nav-link active flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                <a href="#" data-page="dashboard" class="nav-link active">
                     <i class="fas fa-chart-pie mr-3 w-4 text-center"></i>
                     Dashboard
                 </a>
             </li>
             <li>
-                <a href="#" data-page="products" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                <a href="#" data-page="products" class="nav-link">
                     <i class="fas fa-box mr-3 w-4 text-center"></i>
                     Manajemen Produk & Harga
                 </a>
             </li>
             <li>
-                <a href="#" data-page="orders" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                <a href="#" data-page="orders" class="nav-link">
                     <i class="fas fa-shopping-cart mr-3 w-4 text-center"></i>
                     Pesanan
                 </a>
             </li>
             <li>
-                <a href="#" data-page="customers" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                <a href="#" data-page="customers" class="nav-link">
                     <i class="fas fa-users mr-3 w-4 text-center"></i>
                     Pelanggan
                 </a>
             </li>
             <li>
-                <a href="#" data-page="website" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                <a href="#" data-page="website" class="nav-link">
                     <i class="fas fa-globe mr-3 w-4 text-center"></i>
                     Manajemen Website
                 </a>
             </li>
             <li>
-                <a href="#" data-page="analytics" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                <a href="#" data-page="analytics" class="nav-link">
                     <i class="fas fa-chart-bar mr-3 w-4 text-center"></i>
                     Analitik
                 </a>
             </li>
             <li>
-                <a href="#" data-page="settings" class="nav-link flex items-center px-6 py-3 text-white text-opacity-80 hover:text-white hover:bg-white hover:bg-opacity-10 transition-all duration-300">
+                <a href="#" data-page="settings" class="nav-link">
                     <i class="fas fa-cog mr-3 w-4 text-center"></i>
                     Pengaturan
                 </a>
@@ -108,7 +110,7 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="main-content ml-sidebar transition-all duration-300">
+    <div class="main-content">
         <!-- Top Navigation -->
         <nav class="bg-white border-b border-gray-200 shadow-sm">
             <div class="px-4 py-3 flex items-center justify-between">
@@ -155,6 +157,25 @@
                 <div class="mb-6">
                     <h2 class="text-3xl font-bold text-gray-800">Dashboard Overview</h2>
                     <p class="text-gray-600">Selamat datang di dashboard admin e-commerce</p>
+                </div>
+                
+                <!-- Testing Panel -->
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2">🧪 Testing Panel</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="window.open('http://localhost:8001/api-test.html', '_blank')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-flask mr-2"></i>API Test
+                        </button>
+                        <button onclick="window.open('http://localhost:8001/register.html', '_blank')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            <i class="fas fa-user-plus mr-2"></i>Test Register
+                        </button>
+                        <button onclick="window.open('http://localhost:8001/login.html', '_blank')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Test Login
+                        </button>
+                        <button onclick="testShowUsers()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
+                            <i class="fas fa-users mr-2"></i>Show Users
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Stats Cards -->
@@ -948,6 +969,7 @@
         </div>
     </div>
 
+    <script src="assets/js/anti-flicker.js"></script>
     <script src="assets/js/config.js"></script>
     <script src="assets/js/api-service.js"></script>
     <script src="assets/js/admin-script-tailwind.js"></script>

@@ -3,73 +3,55 @@
    Dashboard Admin E-Commerce
 ======================================== */
 
+// Detect backend configuration
+function detectBackendConfig() {
+    const currentPort = window.location.port || '8000';
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname || 'localhost';
+    
+    return {
+        port: currentPort,
+        host: `${protocol}//${hostname}:${currentPort}`,
+        api: `${protocol}//${hostname}:${currentPort}/api`
+    };
+}
+
 // Backend configuration
 const BACKEND_CONFIG = {
-    // Base URL backend - sesuai dengan backend Go
-    BASE_URL: 'http://localhost:5000',
-    API_BASE_URL: 'http://localhost:5000/api',
-    
-    // Timeout settings
-    REQUEST_TIMEOUT: 30000, // 30 seconds
-    
-    // Retry settings
-    MAX_RETRIES: 3,
-    RETRY_DELAY: 1000, // 1 second
-    
-    // File upload settings - sesuai dengan backend Go (10MB)
-    MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB (sesuai backend Go)
-    ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'],
-    
-    // Cache settings
-    CACHE_ENABLED: true,
-    CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
+    ...detectBackendConfig(),
+    timeout: 5000,
+    retryAttempts: 3,
+    retryDelay: 1000
 };
-
-// Environment detection
-const ENVIRONMENT = {
-    isDevelopment: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
-    isProduction: window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1',
-    
-    // Auto-detect backend URL based on environment
-    getBackendURL() {
-        if (this.isDevelopment) {
-            return 'http://localhost:5000';
-        } else {
-            // Untuk production, sesuaikan dengan URL backend Anda
-            return 'https://your-backend-domain.com';
-        }
-    }
-};
-
-// Update backend URL based on environment
-BACKEND_CONFIG.BASE_URL = ENVIRONMENT.getBackendURL();
-BACKEND_CONFIG.API_BASE_URL = ENVIRONMENT.getBackendURL() + '/api';
 
 // API Endpoints
 const API_ENDPOINTS = {
     // Health check
-    HEALTH: '/health',
-    // Produk
-    PRODUCTS: '/products',
-    PRODUCT_BY_ID: (id) => `/products/${id}`,
-    // Admin
-    ADMINS: '/admins',
-    ADMIN_BY_ID: (id) => `/admins/${id}`,
+    HEALTH: '/api/health',
+    // Products
+    PRODUCTS: '/api/products',
+    PRODUCT_BY_ID: (id) => `/api/products/${id}`,
+    // Orders
+    ORDERS: '/api/orders',
+    ORDER_BY_ID: (id) => `/api/orders/${id}`,
+    // Customers
+    CUSTOMERS: '/api/customers',
+    CUSTOMER_BY_ID: (id) => `/api/customers/${id}`,
     // Auth
-    LOGIN: '/login',
-    REGISTER: '/register',
+    LOGIN: '/api/login',
+    REGISTER: '/api/register',
+    // Users
+    USERS: '/api/users',
     // Upload
-    UPLOAD: '/upload',
-    // Statistik
-    STATS: '/stats',
-    // Static file (gambar upload)
-    STATIC_UPLOAD: (filename) => `/static/uploads/${filename}`
+    UPLOAD: '/api/upload',
+    // Stats
+    STATS: '/api/stats'
 };
 
 // HTTP Headers
 const DEFAULT_HEADERS = {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    'Accept': 'application/json'
 };
 
 // Error messages
@@ -79,70 +61,26 @@ const ERROR_MESSAGES = {
     VALIDATION_ERROR: 'Data yang dimasukkan tidak valid.',
     UNAUTHORIZED: 'Anda tidak memiliki akses untuk melakukan tindakan ini.',
     NOT_FOUND: 'Data yang dicari tidak ditemukan.',
-    TIMEOUT: 'Permintaan timeout. Silakan coba lagi.',
-    FILE_TOO_LARGE: `Ukuran file terlalu besar. Maksimal ${BACKEND_CONFIG.MAX_FILE_SIZE / 1024 / 1024}MB.`,
-    INVALID_FILE_TYPE: 'Tipe file tidak didukung. Gunakan JPG, PNG, atau GIF.',
-    PRODUCT_NOT_FOUND: 'Produk tidak ditemukan',
-    ADMIN_NOT_FOUND: 'Admin tidak ditemukan',
-    USERNAME_EXISTS: 'Username sudah ada',
-    INVALID_CREDENTIALS: 'Username/password salah',
+    TIMEOUT: 'Permintaan timeout. Silakan coba lagi.'
 };
 
-// Status messages
+// Success messages
 const SUCCESS_MESSAGES = {
     PRODUCT_CREATED: 'Produk berhasil ditambahkan',
     PRODUCT_UPDATED: 'Produk berhasil diperbarui',
     PRODUCT_DELETED: 'Produk berhasil dihapus',
-    IMAGE_UPLOADED: 'Gambar berhasil diupload',
-    DATA_REFRESHED: 'Data berhasil di-refresh',
-    CONNECTION_ESTABLISHED: 'Koneksi ke backend berhasil',
+    ORDER_UPDATED: 'Pesanan berhasil diperbarui',
+    CUSTOMER_UPDATED: 'Data pelanggan berhasil diperbarui',
+    UPLOAD_SUCCESS: 'File berhasil diunggah',
+    LOGIN_SUCCESS: 'Login berhasil',
+    REGISTER_SUCCESS: 'Registrasi berhasil'
 };
 
-// Export configuration for use in other files
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        BACKEND_CONFIG,
-        ENVIRONMENT,
-        API_ENDPOINTS,
-        DEFAULT_HEADERS,
-        ERROR_MESSAGES,
-        SUCCESS_MESSAGES
-    };
-}
+// Make configurations globally available
+window.BACKEND_CONFIG = BACKEND_CONFIG;
+window.API_ENDPOINTS = API_ENDPOINTS;
+window.DEFAULT_HEADERS = DEFAULT_HEADERS;
+window.ERROR_MESSAGES = ERROR_MESSAGES;
+window.SUCCESS_MESSAGES = SUCCESS_MESSAGES;
 
-// Global configuration for browser
-window.BackendConfig = {
-    BACKEND_CONFIG,
-    ENVIRONMENT,
-    API_ENDPOINTS,
-    DEFAULT_HEADERS,
-    ERROR_MESSAGES,
-    SUCCESS_MESSAGES
-};
-
-// Debug information
-if (ENVIRONMENT.isDevelopment) {
-    console.log('🔧 Backend Configuration:', {
-        baseURL: BACKEND_CONFIG.BASE_URL,
-        apiURL: BACKEND_CONFIG.API_BASE_URL,
-        environment: ENVIRONMENT.isDevelopment ? 'Development' : 'Production',
-        backendType: 'Golang with Gin Framework',
-        database: 'MongoDB',
-        maxFileSize: '10MB'
-    });
-    
-    // Quick backend check
-    fetch(BACKEND_CONFIG.BASE_URL + '/api/health')
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'ok') {
-                console.log('✅ Backend Golang is healthy:', data);
-            } else {
-                console.warn('⚠️ Backend responded but with issues:', data);
-            }
-        })
-        .catch(error => {
-            console.error('❌ Backend not accessible:', error.message);
-            console.log('💡 Make sure Golang backend is running: go run main.go');
-        });
-}
+console.log('📝 Configuration loaded:', BACKEND_CONFIG);

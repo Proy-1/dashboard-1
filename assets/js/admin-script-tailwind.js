@@ -1,8 +1,17 @@
-// Admin Dashboard JavaScript with Tailwind CSS
+// Admin Dashboard JavaScript
 // Integrated with Backend API Service
 
 // Check authentication on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Remove loading class
+    document.body.classList.remove('loading');
+    
+    // Prevent multiple initialization
+    if (window.dashboardInitialized) {
+        return;
+    }
+    window.dashboardInitialized = true;
+    
     checkAuthentication();
     initializeDashboard();
 });
@@ -12,14 +21,22 @@ function checkAuthentication() {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const userEmail = localStorage.getItem('userEmail');
     
+    console.log('🔍 Dashboard authentication check:', { isLoggedIn, userEmail });
+    
     if (!isLoggedIn || isLoggedIn !== 'true') {
-        // Redirect to login page
-        window.location.href = 'login.html';
-        return;
+        console.log('❌ Not authenticated, redirecting to login');
+        // Redirect to login page ONCE
+        if (window.location.pathname !== '/login.html' && !window.location.pathname.includes('login.html')) {
+            console.log('🔄 Redirecting to login.html');
+            window.location.href = 'login.html';
+        }
+        return false;
     }
     
+    console.log('✅ Authenticated successfully');
     // Update user info in navbar
     updateUserInfo(userEmail);
+    return true;
 }
 
 // Update user information in the navbar
@@ -114,12 +131,16 @@ async function loadDashboardData() {
 
 // Setup periodic backend status check
 function setupPeriodicStatusCheck() {
-    // Check every 30 seconds
+    // Check every 60 seconds (reduced from 30 seconds)
     setInterval(async () => {
-        if (typeof apiService !== 'undefined') {
-            await apiService.checkConnectionStatus();
+        try {
+            if (typeof apiService !== 'undefined') {
+                await apiService.checkConnectionStatus();
+            }
+        } catch (error) {
+            console.log('⚠️ Status check failed (normal for standalone mode):', error.message);
         }
-    }, 30000);
+    }, 60000); // Increased to 60 seconds
 }
 
 // Sidebar toggle functionality
@@ -727,6 +748,24 @@ window.viewOrder = viewOrder;
 window.updateOrderStatus = updateOrderStatus;
 window.viewCustomer = viewCustomer;
 window.editCustomer = editCustomer;
+
+// Testing functions
+window.testShowUsers = async function() {
+    try {
+        const response = await fetch('http://localhost:8001/api/users');
+        const data = await response.json();
+        
+        if (data.success) {
+            const users = data.data.users;
+            const userList = users.map(user => `• ${user}`).join('\n');
+            alert(`📋 Registered Users (${data.data.count}):\n\n${userList}`);
+        } else {
+            alert('❌ Failed to get users: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('❌ Error connecting to backend: ' + error.message);
+    }
+};
 
 // Handle window resize
 window.addEventListener('resize', function() {
