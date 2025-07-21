@@ -258,13 +258,12 @@
         // Form submission
         document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const agreeTerms = document.getElementById('agreeTerms').checked;
-            
+
             // Validation
             if (!username) {
                 showError('Username tidak boleh kosong!');
@@ -282,78 +281,40 @@
                 showError('Anda harus menyetujui syarat dan ketentuan!');
                 return;
             }
-            
+
             // Show loading state
             const submitButton = document.querySelector('button[type="submit"]');
             const originalText = submitButton.innerHTML;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mendaftarkan...';
             submitButton.disabled = true;
-            
-            try {
-                // Try backend API first
-                console.log('🔍 Attempting backend API registration...');
-                
-                try {
-                    const response = await fetch('http://localhost:8001/api/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            email: email,
-                            password: password
-                        })
-                    });
 
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        console.log('✅ Backend API registration successful');
-                        showSuccess('Admin berhasil didaftarkan! Silakan login dengan akun baru Anda.');
-                        
-                        // Reset form
-                        document.getElementById('registerForm').reset();
-                        document.getElementById('passwordStrength').innerHTML = '';
-                        
-                        // Redirect to login after 2 seconds
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 2000);
-                        
-                        return;
-                    } else {
-                        console.log('❌ Backend API registration failed:', data.error);
-                        throw new Error(data.error || 'Registrasi gagal');
-                    }
-                } catch (apiError) {
-                    console.log('⚠️ Backend API error, trying fallback:', apiError.message);
-                    
-                    // If it's a specific backend error, show it
-                    if (apiError.message.includes('sudah terdaftar')) {
-                        throw new Error('Email sudah terdaftar. Silakan gunakan email lain atau login dengan akun existing.');
-                    }
-                    
-                    // Continue to demo mode fallback
-                    console.log('🔄 Using demo mode fallback...');
-                    showSuccess('DEMO MODE: Admin berhasil didaftarkan! (Backend tidak aktif)');
-                    
-                    // Reset form
+            try {
+                // Kirim ke backend API (port 5000)
+                const response = await fetch('http://localhost:5000/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        password: password
+                    })
+                });
+                const data = await response.json();
+                if (response.ok && (data.admin || data.message)) {
+                    showSuccess('Admin berhasil didaftarkan! Silakan login dengan akun baru Anda.');
                     document.getElementById('registerForm').reset();
                     document.getElementById('passwordStrength').innerHTML = '';
-                    
-                    // Redirect to login after 2 seconds
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 2000);
-                    
-                    return;
+                } else {
+                    throw new Error(data.error || 'Registrasi gagal');
                 }
-                
             } catch (error) {
-                console.error('❌ Registration error:', error.message);
                 showError(error.message || 'Registrasi gagal. Silakan coba lagi.');
             } finally {
-                // Reset button state
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
             }
@@ -361,54 +322,12 @@
         
         function showError(message) {
             console.log('🚨 Showing error:', message);
-            
-            // IMMEDIATE alert untuk memastikan user melihat pesan
-            try {
-                alert('❌ Error: ' + message);
-                console.log('✅ Browser alert shown successfully');
-                try {
-                    const response = await fetch('http://localhost:5000/api/register', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            username: username,
-                            email: email,
-                            password: password
-                        })
-                    });
+            alert('❌ Error: ' + message);
+        }
 
-                    const data = await response.json();
-                    if (data.admin || data.message) {
-                        console.log('✅ Backend API registration successful');
-                        showSuccess('Admin berhasil didaftarkan! Silakan login dengan akun baru Anda.');
-                        // Reset form
-                        document.getElementById('registerForm').reset();
-                        document.getElementById('passwordStrength').innerHTML = '';
-                        // Redirect to login after 2 seconds
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 2000);
-                        return;
-                    } else {
-                        console.log('❌ Backend API registration failed:', data.error);
-                        throw new Error(data.error || 'Registrasi gagal');
-                    }
-                } catch (apiError) {
-            alert.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>
-                    <span>${message}</span>
-                    <button type="button" class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.parentElement.remove()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-            
-            // Insert after form
-            const form = document.getElementById('registerForm');
-            form.parentNode.insertBefore(alert, form.nextSibling);
+        function showSuccess(message) {
+            console.log('✅ Showing success:', message);
+            alert('✅ ' + message);
         }
 
         // Check if already logged in

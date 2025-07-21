@@ -56,99 +56,35 @@
 </head>
 <body class="bg-gray-100 font-nunito loading">
     <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="p-6 border-b border-white border-opacity-10">
-            <h4 class="text-white font-bold text-lg">
-                <i class="fas fa-store mr-2"></i>E-Commerce Admin
-            </h4>
+    <!-- Sidebar klasik -->
+    <div style="width:220px;float:left;height:100vh;background:#2d3e50;color:#fff;position:fixed;top:0;left:0;z-index:10;">
+        <div style="padding:24px 0 16px 0;text-align:center;border-bottom:1px solid #223042;">
+            <span style="font-size:1.3rem;font-weight:bold;"><i class="fas fa-store"></i> E-Commerce Admin</span>
         </div>
-        
-        <ul class="flex flex-col py-4">
-            <li>
-                <a href="#" data-page="dashboard" class="nav-link active">
-                    <i class="fas fa-chart-pie mr-3 w-4 text-center"></i>
-                    Dashboard
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="products" class="nav-link">
-                    <i class="fas fa-box mr-3 w-4 text-center"></i>
-                    Manajemen Produk & Harga
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="orders" class="nav-link">
-                    <i class="fas fa-shopping-cart mr-3 w-4 text-center"></i>
-                    Pesanan
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="customers" class="nav-link">
-                    <i class="fas fa-users mr-3 w-4 text-center"></i>
-                    Pelanggan
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="website" class="nav-link">
-                    <i class="fas fa-globe mr-3 w-4 text-center"></i>
-                    Manajemen Website
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="analytics" class="nav-link">
-                    <i class="fas fa-chart-bar mr-3 w-4 text-center"></i>
-                    Analitik
-                </a>
-            </li>
-            <li>
-                <a href="#" data-page="settings" class="nav-link">
-                    <i class="fas fa-cog mr-3 w-4 text-center"></i>
-                    Pengaturan
-                </a>
-            </li>
+        <ul style="list-style:none;padding:0;margin:0;">
+            <li style="padding:16px 32px;"><a href="#" style="color:#fff;text-decoration:none;"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+            <li style="padding:16px 32px;background:#223042;"><a href="#" style="color:#fff;text-decoration:none;"><i class="fas fa-box"></i> Produk & Harga</a></li>
+            <li style="padding:16px 32px;"><a href="#" style="color:#fff;text-decoration:none;"><i class="fas fa-shopping-cart"></i> Pesanan</a></li>
+            <li style="padding:16px 32px;"><a href="#" style="color:#fff;text-decoration:none;"><i class="fas fa-users"></i> Pelanggan</a></li>
+            <li style="padding:16px 32px;"><a href="#" style="color:#fff;text-decoration:none;"><i class="fas fa-cog"></i> Pengaturan</a></li>
         </ul>
-    </nav>
+        <div style="position:absolute;bottom:24px;width:100%;text-align:center;font-size:0.9rem;color:#b0b8c1;">
+            <i class="fas fa-user-circle"></i> <span id="sidebar-username">Admin</span>
+        </div>
+    </div>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <div class="main-content" style="margin-left:220px;">
         <!-- Top Navigation -->
-        <nav class="bg-white border-b border-gray-200 shadow-sm">
-            <div class="px-4 py-3 flex items-center justify-between">
-                <div class="flex items-center">
-                    <button class="text-gray-600 hover:text-gray-800 focus:outline-none mr-3" id="sidebarToggle">
-                        <i class="fas fa-bars text-lg"></i>
-                    </button>
-                    <div id="backend-status" class="ml-4">
-                        <!-- Backend status will be inserted here -->
-                    </div>
-                    <button onclick="refreshBackendStatus()" class="ml-2 text-sm text-blue-600 hover:text-blue-800" title="Refresh Backend Status">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-                
-                <div class="relative">
-                    <div class="dropdown">
-                        <button class="flex items-center text-gray-700 hover:text-gray-900 focus:outline-none" type="button" id="dropdownMenuButton" onclick="toggleDropdown()">
-                            <i class="fas fa-user-circle mr-2"></i>
-                            <span>Admin</span>
-                            <i class="fas fa-chevron-down ml-2 text-sm"></i>
-                        </button>
-                        <div class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50" id="dropdownMenu">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
-                                <i class="fas fa-user mr-2"></i>Profil
-                            </a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
-                                <i class="fas fa-cog mr-2"></i>Pengaturan
-                            </a>
-                            <hr class="border-gray-200 my-1">
-                            <a href="#" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg">
-                                <i class="fas fa-sign-out-alt mr-2"></i>Keluar
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        <!-- Header klasik -->
+        <div style="background:#fff;padding:18px 32px 12px 32px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:1.2rem;font-weight:bold;color:#223042;">Manajemen Produk & Harga</div>
+            <div id="backend-status" style="color:#4e73df;font-size:1rem;"></div>
+            <div style="font-size:1rem;color:#223042;">
+                <span id="header-username">admin</span>
+                <button onclick="logout()" style="margin-left:16px;background:#e53e3e;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;">Keluar</button>
             </div>
-        </nav>
+        </div>
 
         <!-- Page Content -->
         <div class="p-6">
@@ -277,89 +213,34 @@
             </div>
 
             <!-- Products Management Page (dengan Manajemen Harga Terintegrasi) -->
-            <div id="products-page" class="page-content">
-                <div class="mb-6">
-                    <h2 class="text-3xl font-bold text-gray-800">Manajemen Produk & Harga</h2>
-                    <p class="text-gray-600">Kelola produk dan harga dalam satu tempat</p>
-                    <div class="mt-4">
-                        <button onclick="showAddProductModal()" class="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
-                            <i class="fas fa-plus mr-2"></i>Tambah Produk Baru
-                        </button>
-                        <button onclick="refreshProducts()" class="ml-2 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
-                            <i class="fas fa-sync-alt mr-2"></i>Refresh
-                        </button>
-                        <button onclick="toggleBulkPricing()" class="ml-2 bg-warning-500 hover:bg-warning-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
-                            <i class="fas fa-calculator mr-2"></i>Update Harga Bulk
-                        </button>
+            <!-- Produk & Harga klasik -->
+            <div id="products-page" class="page-content active" style="background:#fff;padding:32px 32px 32px 32px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.04);margin-top:32px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+                    <div style="font-size:1.5rem;font-weight:bold;color:#223042;">Daftar Produk</div>
+                    <div>
+                        <button onclick="showAddProductModal()" style="background:#4e73df;color:#fff;padding:8px 20px;border:none;border-radius:4px;font-weight:600;margin-right:8px;cursor:pointer;"><i class="fas fa-plus"></i> Tambah Produk</button>
+                        <button onclick="refreshProducts()" style="background:#10b981;color:#fff;padding:8px 20px;border:none;border-radius:4px;font-weight:600;cursor:pointer;"><i class="fas fa-sync-alt"></i> Refresh</button>
                     </div>
                 </div>
-
-                <!-- Bulk Pricing Panel (Hidden by default) -->
-                <div id="bulk-pricing-panel" class="bg-white rounded-xl shadow-sm mb-6" style="display: none;">
-                    <div class="p-6 border-b border-gray-200">
-                        <h6 class="font-bold text-warning-500 text-lg">Update Harga Secara Bulk</h6>
-                    </div>
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
-                                <select id="bulk-category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                    <option value="">Semua Produk</option>
-                                    <option value="smartphone">Smartphone</option>
-                                    <option value="laptop">Laptop</option>
-                                    <option value="accessories">Accessories</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Update</label>
-                                <select id="bulk-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                                    <option value="percentage_increase">Naik Persentase</option>
-                                    <option value="percentage_decrease">Turun Persentase</option>
-                                    <option value="fixed_amount">Nilai Tetap</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Nilai (%)</label>
-                                <input type="number" id="bulk-value" placeholder="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                            </div>
-                            <div class="flex items-end">
-                                <button onclick="applyBulkPricing()" class="w-full bg-warning-500 hover:bg-warning-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
-                                    <i class="fas fa-calculator mr-2"></i>Apply
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm">
-                    <div class="p-6 border-b border-gray-200">
-                        <h6 class="font-bold text-primary-500 text-lg">Daftar Produk</h6>
-                    </div>
-                    <div class="p-6">
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead>
-                                    <tr class="bg-gray-50">
-                                        <th class="text-center py-3 px-4 font-semibold text-sm text-gray-700">No</th>
-                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Produk</th>
-                                        <th class="text-left py-3 px-4 font-semibold text-sm text-gray-700">Harga</th>
-                                        <th class="text-center py-3 px-4 font-semibold text-sm text-gray-700">Status</th>
-                                        <th class="text-center py-3 px-4 font-semibold text-sm text-gray-700">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="products-table-body">
-                                    <!-- Products akan dimuat dari backend melalui API service -->
-                                    <tr>
-                                        <td colspan="5" class="text-center py-8">
-                                            <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
-                                            <p class="mt-2 text-gray-500">Memuat data produk...</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#f4f6fa;">
+                            <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;">No</th>
+                            <th style="padding:12px 8px;text-align:left;border-bottom:2px solid #e5e7eb;">Produk</th>
+                            <th style="padding:12px 8px;text-align:left;border-bottom:2px solid #e5e7eb;">Harga</th>
+                            <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;">Status</th>
+                            <th style="padding:12px 8px;text-align:center;border-bottom:2px solid #e5e7eb;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-table-body">
+                        <tr>
+                            <td colspan="5" style="text-align:center;padding:32px 0;color:#888;">
+                                <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i>
+                                <div style="margin-top:8px;">Memuat data produk...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <!-- Website Management Page -->
