@@ -130,11 +130,11 @@
         <div class="login-form">
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="email" class="form-label">
-                        <i class="fas fa-envelope"></i>Email
+                    <label for="username" class="form-label">
+                        <i class="fas fa-user"></i>Username
                     </label>
-                    <input type="email" id="email" name="email" class="form-input" 
-                           placeholder="Masukkan email admin" required>
+                    <input type="text" id="username" name="username" class="form-input" 
+                           placeholder="Masukkan username admin" required>
                 </div>
                 
                 <div class="form-group">
@@ -155,7 +155,7 @@
             <div class="login-footer" style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
                 <p style="color: #6b7280; font-size: 14px;">
                     Belum punya akun admin? 
-                    <a href="register.html" class="register-link">📝 Daftar di sini</a>
+                <a href="register.html" class="register-link" id="registerLink">📝 Daftar di sini</a>
                 </p>
             </div>
         </div>
@@ -163,30 +163,27 @@
 
     <script>
         console.log('🔍 Login page loading...');
+        // Pastikan link register tidak diblokir event JS global
+
         
         // Initialize login form
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             console.log('📝 Login form submitted');
             
-            const email = document.getElementById('email').value.trim();
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             
-            console.log('🔍 Login attempt:', email);
+            console.log('🔍 Login attempt:', username);
             
             // Basic validation
-            if (!email) {
-                showError('Email tidak boleh kosong!');
+            if (!username) {
+                showError('Username tidak boleh kosong!');
                 return;
             }
             
             if (!password) {
                 showError('Password tidak boleh kosong!');
-                return;
-            }
-            
-            if (!isValidEmail(email)) {
-                showError('Format email tidak valid!');
                 return;
             }
             
@@ -197,11 +194,9 @@
             submitButton.disabled = true;
             
             try {
-                // Try backend API first - use port 8000 consistently
-                const apiUrl = `http://localhost:8000/api/login`;
-                
+                // Hanya gunakan backend API untuk login
+                const apiUrl = `http://localhost:5000/api/login`;
                 console.log('🔍 Trying API URL:', apiUrl);
-                
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST',
@@ -209,61 +204,32 @@
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            email: email,
+                            username: username,
                             password: password
                         })
                     });
-                    
                     if (response.ok) {
                         const data = await response.json();
-                        
-                        if (data.success) {
+                        if (data.admin && data.token) {
                             console.log('✅ Backend API login successful');
                             showSuccess('Login berhasil! Mengarahkan ke dashboard...');
-                            
                             localStorage.setItem('isLoggedIn', 'true');
-                            localStorage.setItem('userEmail', email);
-                            
-                            setTimeout(() => {
+                            localStorage.setItem('userName', username);
+                            localStorage.setItem('token', data.token);
+                            setTimeout(function() {
                                 window.location.href = 'index.html';
-                            }, 1500);
+                            }, 500);
                             return;
                         } else {
                             throw new Error(data.error || 'Login gagal');
                         }
                     } else {
-                        throw new Error('Server error: ' + response.status);
+                        const data = await response.json().catch(() => ({}));
+                        throw new Error(data.error || 'Server error: ' + response.status);
                     }
                 } catch (apiError) {
                     console.log('⚠️ Backend API error:', apiError.message);
-                    
-                    // Continue to fallback authentication
-                    console.log('🔄 Using fallback local authentication...');
-                }
-                
-                // Fallback to local authentication
-                if (email === 'superadmin@company.com' && password === 'SuperSecure123!') {
-                    console.log('✅ Local credentials valid');
-                    showSuccess('Login berhasil! Mengarahkan ke dashboard...');
-                    
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('userEmail', email);
-                    
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1500);
-                    return;
-                } else {
-                    console.log('❌ Invalid credentials');
-                    
-                    // Show specific error messages
-                    if (email !== 'superadmin@company.com') {
-                        throw new Error('Email tidak ditemukan. Gunakan: superadmin@company.com');
-                    } else if (password !== 'SuperSecure123!') {
-                        throw new Error('Password salah. Silakan periksa password Anda.');
-                    } else {
-                        throw new Error('Email atau password salah!');
-                    }
+                    throw new Error('Tidak dapat terhubung ke server. Coba lagi nanti.');
                 }
                 
             } catch (error) {
@@ -332,11 +298,11 @@
             form.parentNode.insertBefore(alert, form.nextSibling);
         }
         
-        // Email validation
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
+        // Username validation (optional, only allow alphanumeric/underscore)
+        // function isValidUsername(username) {
+        //     const usernameRegex = /^[a-zA-Z0-9_]+$/;
+        //     return usernameRegex.test(username);
+        // }
         
         // Check if already logged in
         console.log('🎉 Login page ready');

@@ -19,11 +19,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // Check if user is authenticated
 function checkAuthentication() {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
-    const userEmail = localStorage.getItem('userEmail');
+    const userName = localStorage.getItem('userName');
+    const token = localStorage.getItem('token');
     
-    console.log('🔍 Dashboard authentication check:', { isLoggedIn, userEmail });
+    console.log('🔍 Dashboard authentication check:', { isLoggedIn, userName, token });
     
-    if (!isLoggedIn || isLoggedIn !== 'true') {
+    if (!isLoggedIn || isLoggedIn !== 'true' || !userName || !token) {
         console.log('❌ Not authenticated, redirecting to login');
         // Redirect to login page ONCE
         if (window.location.pathname !== '/login.html' && !window.location.pathname.includes('login.html')) {
@@ -35,15 +36,15 @@ function checkAuthentication() {
     
     console.log('✅ Authenticated successfully');
     // Update user info in navbar
-    updateUserInfo(userEmail);
+    updateUserInfo(userName);
     return true;
 }
 
 // Update user information in the navbar
-function updateUserInfo(email) {
+function updateUserInfo(userName) {
     const userDropdown = document.querySelector('#dropdownMenuButton span');
-    if (userDropdown && email) {
-        userDropdown.textContent = email.split('@')[0];
+    if (userDropdown && userName) {
+        userDropdown.textContent = userName;
     }
 }
 
@@ -51,7 +52,8 @@ function updateUserInfo(email) {
 function logout() {
     if (confirm('Apakah Anda yakin ingin keluar?')) {
         localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('token');
         window.location.href = 'login.html';
     }
 }

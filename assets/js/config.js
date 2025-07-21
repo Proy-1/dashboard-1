@@ -4,15 +4,13 @@
 ======================================== */
 
 // Detect backend configuration
+
+// Always use backend at http://localhost:5000
 function detectBackendConfig() {
-    const currentPort = window.location.port || '8000';
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname || 'localhost';
-    
     return {
-        port: currentPort,
-        host: `${protocol}//${hostname}:${currentPort}`,
-        api: `${protocol}//${hostname}:${currentPort}/api`
+        port: '5000',
+        host: `http://localhost:5000`,
+        api: `http://localhost:5000/api`
     };
 }
 

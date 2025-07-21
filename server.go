@@ -250,7 +250,7 @@ func setupFileServer() {
 
 		// Handle root path
 		if r.URL.Path == "/" {
-			http.ServeFile(w, r, filepath.Join(pwd, "login.html"))
+			http.ServeFile(w, r, filepath.Join(pwd, "index.html"))
 			return
 		}
 
