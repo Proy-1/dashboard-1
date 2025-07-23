@@ -1,3 +1,20 @@
+    // Preview image on file input change
+    const fileInput = document.getElementById('product-image');
+    const previewImg = document.getElementById('product-image-preview');
+    if (fileInput && previewImg) {
+        fileInput.onchange = function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    previewImg.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewImg.src = '/assets/img/no-image.png';
+            }
+        };
+    }
 // Admin Dashboard JavaScript
 // Integrated with Backend API Service
 
@@ -174,15 +191,11 @@ function renderProductsTable(tableBody, products, errorMsg) {
         row.setAttribute('data-product-id', product._id || product.id || '');
         
         // Handle image URL - pastikan menggunakan full URL jika relative
-        let imageUrl = product.image_url || product.image || 'https://via.placeholder.com/50';
-        if (imageUrl && imageUrl.startsWith('/uploads')) {
-            imageUrl = `http://localhost:5000${imageUrl}`;
-        }
-        
+        let imageSrc = product.image_base64 || '/assets/img/no-image.png';
         row.innerHTML = `
             <td class="py-3 px-4 text-sm">${idx + 1}</td>
             <td class="py-3 px-4">
-                <img src="${imageUrl}" class="w-12 h-12 object-cover rounded" alt="Product" onerror="this.src='https://via.placeholder.com/50'">
+                <img src="${imageSrc}" class="w-12 h-12 object-cover rounded" alt="Product" onerror="this.src='/assets/img/no-image.png'">
             </td>
             <td class="py-3 px-4 text-sm font-medium">${product.name || '-'}</td>
             <td class="py-3 px-4 text-sm">${product.category || '-'}</td>
@@ -349,7 +362,9 @@ function showAddProductModal() {
     document.getElementById('product-id').value = '';
     document.getElementById('product-image-url').value = '';
     document.getElementById('modal-title').textContent = 'Tambah Produk Baru';
-    
+    // Set preview image
+    const previewImg = document.getElementById('product-image-preview');
+    if (previewImg) previewImg.src = '/assets/img/no-image.png';
     // Show modal
     showModal('productModal');
 }

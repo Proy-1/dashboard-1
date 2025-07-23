@@ -618,22 +618,23 @@ class APIService {
 
         // Render products
         tbody.innerHTML = products.map((product, index) => {
-            // Handle image URL - pastikan menggunakan full URL jika relative
-            let imageUrl = product.image_url || product.image || 'https://via.placeholder.com/50';
-            if (imageUrl && imageUrl.startsWith('/uploads')) {
-                imageUrl = `http://localhost:5000${imageUrl}`;
+            // Gunakan image_base64 jika ada
+            let imageSrc = product.image_base64 || '';
+            if (!imageSrc) {
+                imageSrc = '/assets/img/no-image.png';
             }
-            
+            // Escape single quotes in product name for JS string
+            const safeName = (product.name || 'Produk').replace(/'/g, "\\'");
             return `
             <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                 <td class="py-3 px-4 text-sm text-center font-medium">${index + 1}</td>
                 <td class="py-3 px-4">
-                    <img src="${imageUrl}" alt="${product.name || 'Product'}" class="w-12 h-12 object-cover rounded" onerror="this.src='https://via.placeholder.com/50'">
+                    <img src="${imageSrc}" alt="${product.name || 'Product'}" class="w-12 h-12 object-cover rounded" onerror="this.src='/assets/img/no-image.png'">
                 </td>
                 <td class="py-3 px-4 text-sm font-medium">${product.name || '-'}</td>
                 <td class="py-3 px-4 text-sm">${product.category || '-'}</td>
                 <td class="py-3 px-4 text-sm font-medium text-green-600">Rp ${product.price ? parseInt(product.price).toLocaleString('id-ID') : '-'}</td>
-                <td class="py-3 px-4 text-sm">${product.stock ?? '-'}</td>
+                <td class="py-3 px-4 text-sm">${product.stock !== undefined ? product.stock : '-'}</td>
                 <td class="py-3 px-4">
                     <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Aktif</span>
                 </td>
@@ -641,7 +642,7 @@ class APIService {
                     <button onclick="editProduct('${product._id || product.id}')" class="text-blue-600 hover:text-blue-800 mr-2" title="Edit Produk">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button onclick="confirmDeleteProduct('${product._id || product.id}', '${(product.name || 'Produk').replace(/'/g, '\\\'')}')" class="text-red-600 hover:text-red-800" title="Hapus Produk">
+                    <button onclick="confirmDeleteProduct('${product._id || product.id}', '${safeName}')" class="text-red-600 hover:text-red-800" title="Hapus Produk">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -711,7 +712,9 @@ async function editProduct(productId) {
     // Validasi input
     if (!productId) {
         console.error('❌ Product ID is required');
-        apiService.showNotification('ID produk tidak valid', 'error');
+        if (typeof apiService !== 'undefined' && apiService.showNotification) {
+            apiService.showNotification('ID produk tidak valid', 'error');
+        }
         return;
     }
     
@@ -719,29 +722,50 @@ async function editProduct(productId) {
         console.log('📡 Fetching product data from API...');
         const product = await apiService.getProduct(productId);
         
-        if (product && product._id) {
+        if (product && (product._id || product.id)) {
             console.log('✅ Product data loaded:', product);
             
             // Populate form dengan data produk
-            document.getElementById('product-id').value = product._id || '';
-            document.getElementById('product-name').value = product.name || '';
-            document.getElementById('product-price').value = product.price || '';
-            document.getElementById('product-description').value = product.description || '';
-            document.getElementById('product-image-url').value = product.image_url || '';
+            const productIdField = document.getElementById('product-id');
+            const productNameField = document.getElementById('product-name');
+            const productPriceField = document.getElementById('product-price');
+            const productDescriptionField = document.getElementById('product-description');
+            const productImageUrlField = document.getElementById('product-image-url');
+            const modalTitle = document.getElementById('modal-title');
             
-            // Update modal title
-            document.getElementById('modal-title').textContent = 'Edit Produk';
+            if (productIdField) productIdField.value = product._id || product.id || '';
+            if (productNameField) productNameField.value = product.name || '';
+            if (productPriceField) productPriceField.value = product.price || '';
+            if (productDescriptionField) productDescriptionField.value = product.description || '';
+            if (productImageUrlField) productImageUrlField.value = product.image_url || '';
+            if (modalTitle) modalTitle.textContent = 'Edit Produk';
             
-            // Show modal
+            // Show modal - try multiple ways to ensure it opens
             console.log('🎭 Opening edit modal...');
-            showModal('productModal');
+            if (typeof showModal === 'function') {
+                showModal('productModal');
+            } else if (typeof window.showModal === 'function') {
+                window.showModal('productModal');
+            } else {
+                // Fallback - manually show modal
+                const modal = document.getElementById('productModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    modal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
         } else {
             console.error('❌ Product not found or invalid data:', product);
-            apiService.showNotification('Produk tidak ditemukan atau data tidak valid', 'error');
+            if (typeof apiService !== 'undefined' && apiService.showNotification) {
+                apiService.showNotification('Produk tidak ditemukan atau data tidak valid', 'error');
+            }
         }
     } catch (error) {
         console.error('❌ Error in editProduct:', error);
-        apiService.showNotification('Error: ' + error.message, 'error');
+        if (typeof apiService !== 'undefined' && apiService.showNotification) {
+            apiService.showNotification('Error: ' + error.message, 'error');
+        }
     }
 }
 
@@ -760,8 +784,14 @@ async function deleteProduct(productId) {
         const success = await apiService.deleteProduct(productId);
         if (success) {
             console.log('✅ Product deleted successfully');
-            // Reload table
-            await apiService.loadProductsTable();
+            // Reload table - use multiple methods to ensure refresh
+            if (typeof loadDashboardData === 'function') {
+                await loadDashboardData();
+            } else if (typeof window.loadDashboardData === 'function') {
+                await window.loadDashboardData();
+            } else if (typeof apiService !== 'undefined' && apiService.loadProductsTable) {
+                await apiService.loadProductsTable();
+            }
         }
     } catch (error) {
         console.error('❌ Error deleting product:', error);
@@ -857,22 +887,47 @@ async function saveProduct() {
 
         if (success) {
             console.log('✅ Product saved successfully');
-            alert('Produk berhasil disimpan!');
+            
+            // Show success notification
+            if (typeof apiService !== 'undefined' && apiService.showNotification) {
+                apiService.showNotification('Produk berhasil disimpan!', 'success');
+            } else {
+                alert('Produk berhasil disimpan!');
+            }
             
             // Close modal and reset form
-            hideModal('productModal');
-            form.reset();
-            document.getElementById('product-id').value = '';
-            document.getElementById('product-image-url').value = '';
-            
-            // Reload products table if available
-            if (typeof window.apiService !== 'undefined' && window.apiService) {
-                console.log('🔄 Reloading products table...');
-                try {
-                    await window.apiService.loadProductsTable();
-                } catch (error) {
-                    console.error('Error reloading products:', error);
+            if (typeof hideModal === 'function') {
+                hideModal('productModal');
+            } else if (typeof window.hideModal === 'function') {
+                window.hideModal('productModal');
+            } else {
+                // Fallback - manually hide modal
+                const modal = document.getElementById('productModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    modal.classList.remove('show');
+                    document.body.style.overflow = 'auto';
                 }
+            }
+            
+            form.reset();
+            const productIdField = document.getElementById('product-id');
+            const productImageUrlField = document.getElementById('product-image-url');
+            if (productIdField) productIdField.value = '';
+            if (productImageUrlField) productImageUrlField.value = '';
+            
+            // Reload products table - use multiple methods to ensure refresh
+            console.log('🔄 Reloading products table...');
+            try {
+                if (typeof loadDashboardData === 'function') {
+                    await loadDashboardData();
+                } else if (typeof window.loadDashboardData === 'function') {
+                    await window.loadDashboardData();
+                } else if (typeof window.apiService !== 'undefined' && window.apiService.loadProductsTable) {
+                    await window.apiService.loadProductsTable();
+                }
+            } catch (error) {
+                console.error('Error reloading products:', error);
             }
             return true;
         } else {
@@ -940,50 +995,22 @@ async function uploadProductImage() {
         console.log('✅ File validation passed');
         console.log('📡 Attempting to upload...');
 
-        if (typeof apiService !== 'undefined' && apiService) {
-            const formData = new FormData();
-            formData.append('image', file);
-
-            const result = await apiService.uploadImage(formData);
-            if (result && result.success && result.image_url) {
-                document.getElementById('product-image-url').value = result.image_url;
-                console.log('✅ Image uploaded successfully:', result.image_url);
-                
-                // Show success notification
-                if (typeof apiService !== 'undefined' && apiService.showNotification) {
-                    apiService.showNotification('Gambar produk berhasil diupload!', 'success');
-                } else {
-                    alert('Gambar produk berhasil diupload!');
-                }
-                
-                if (result.file_size) {
-                    console.log('📏 File size:', result.file_size);
-                }
-                return true;
-            } else {
-                console.error('❌ Upload failed:', result ? result.message : 'No result');
-                
-                // Show error notification
-                if (typeof apiService !== 'undefined' && apiService.showNotification) {
-                    apiService.showNotification('Gagal mengupload gambar: ' + (result ? result.message : 'Unknown error'), 'error');
-                } else {
-                    alert('Gagal mengupload gambar: ' + (result ? result.message : 'Unknown error'));
-                }
-                return false;
+        // Selalu gunakan FileReader untuk base64
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64 = e.target.result;
+            document.getElementById('product-image-url').value = '';
+            document.getElementById('product-image-base64').value = base64;
+            // Tampilkan preview
+            const previewImg = document.getElementById('product-image-preview');
+            if (previewImg) previewImg.src = base64;
+            // Notifikasi
+            if (typeof apiService !== 'undefined' && apiService.showNotification) {
+                apiService.showNotification('Gambar produk siap disimpan!', 'success');
             }
-        } else {
-            console.log('⚠️ API Service not available, using local preview fallback');
-            // Fallback for offline mode - create local URL
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imageUrl = e.target.result;
-                document.getElementById('product-image-url').value = imageUrl;
-                console.log('✅ Local image preview set');
-                alert('Gambar berhasil dipilih (mode offline)');
-            };
-            reader.readAsDataURL(file);
-            return true;
-        }
+        };
+        reader.readAsDataURL(file);
+        return true;
     } catch (error) {
         console.error('💥 Error uploading image:', error);
         if (typeof apiService !== 'undefined') {

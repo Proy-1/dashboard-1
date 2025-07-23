@@ -844,9 +844,63 @@
                             <button type="button" onclick="uploadProductImageWrapper()" class="btn btn-primary" title="Upload gambar produk">
                                 <i class="fas fa-upload mr-1"></i>Upload
                             </button>
+                            <script>
+                            // Wrapper untuk upload gambar dan alert
+                            function uploadProductImageWrapper() {
+                                var fileInput = document.getElementById('product-image');
+                                var file = fileInput.files[0];
+                                if (!file) {
+                                    alert('Pilih file gambar terlebih dahulu!');
+                                    return;
+                                }
+                                if (!file.type.startsWith('image/')) {
+                                    alert('File yang dipilih bukan gambar!');
+                                    return;
+                                }
+                                var reader = new FileReader();
+                                reader.onload = function(e) {
+                                    var base64 = e.target.result;
+                                    document.getElementById('product-image-base64').value = base64;
+                                    setProductImagePreview(base64);
+                                    alert('Gambar berhasil diupload!');
+                                };
+                                reader.onerror = function() {
+                                    alert('Gagal membaca file gambar!');
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                            </script
                         </div>
                         <input type="hidden" id="product-image-url" name="image_url">
+                        <input type="hidden" id="product-image-base64" name="image_base64">
                         <small class="text-gray-500 mt-1 block">Format: JPG, PNG, GIF (Max: 5MB)</small>
+                        <div class="mt-2">
+                            <label class="block text-sm font-medium">Preview Gambar</label>
+                            <div id="product-image-preview-container">
+                                <!-- Preview image will be rendered here -->
+                            </div>
+                            <script>
+                            // Render preview image only if base64 exists, else show placeholder
+                            function setProductImagePreview(base64) {
+                                var container = document.getElementById('product-image-preview-container');
+                                container.innerHTML = '';
+                                if (base64 && base64.trim() !== '') {
+                                    var img = document.createElement('img');
+                                    img.src = base64;
+                                    img.className = 'w-20 h-20 object-cover rounded border mt-1';
+                                    img.alt = 'Preview';
+                                    container.appendChild(img);
+                                } else {
+                                    var placeholder = document.createElement('div');
+                                    placeholder.className = 'w-20 h-20 flex items-center justify-center bg-gray-200 rounded border mt-1 text-gray-500';
+                                    placeholder.innerHTML = '<i class="fas fa-image fa-2x"></i><br><span style="font-size:0.8rem;">Tidak ada gambar</span>';
+                                    container.appendChild(placeholder);
+                                }
+                            }
+                            // When showing modal for edit, call setProductImagePreview(product.image_base64)
+                            // When uploading new image, update preview with base64
+                            </script>
+                        </div>
                     </div>
                 </form>
             </div>
