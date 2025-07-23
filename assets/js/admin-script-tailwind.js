@@ -116,19 +116,93 @@ async function initializeBackendConnection() {
 // Load dashboard data from backend
 async function loadDashboardData() {
     if (typeof apiService !== 'undefined') {
-        // Load products and update stats
-        const products = await apiService.getProducts();
-        updateDashboardStats(products);
+        let products = [];
+        let errorMsg = '';
+        try {
+            // Ambil data produk dari backend - gunakan method dari APIService class
+            console.log('🔄 Fetching products from backend...');
+            products = await apiService.getProducts();
+            console.log('📦 Response produk dari backend:', products);
+            
+            // Pastikan products adalah array
+            if (!Array.isArray(products)) {
+                console.warn('Products bukan array, menggunakan array kosong');
+                products = [];
+                errorMsg = 'Format data produk dari backend tidak sesuai.';
+            }
+        } catch (err) {
+            console.error('❌ Gagal mengambil data produk dari backend:', err);
+            errorMsg = 'Gagal mengambil data produk dari backend: ' + err.message;
+            products = [];
+        }
         
-        // If we're on the products page, load the table
+        updateDashboardStats(products);
+
+        // Render tabel produk hanya jika sedang di halaman products
         const currentPage = document.querySelector('.page-content.active');
         if (currentPage && currentPage.id === 'products-page') {
-            await apiService.loadProductsTable();
+            const tableBody = document.getElementById('productsTableBody');
+            if (tableBody) {
+                renderProductsTable(tableBody, products, errorMsg);
+            }
         }
     } else {
-        console.warn('API Service not loaded, using sample data');
-        initializeSampleData();
+        console.error('❌ apiService tidak tersedia');
+        // Jika API Service tidak tersedia, tampilkan pesan error
+        const tableBody = document.getElementById('productsTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-red-500">Gagal mengambil data produk dari backend (API Service tidak tersedia).</td></tr>`;
+        }
     }
+}
+
+// Helper function untuk render tabel produk
+function renderProductsTable(tableBody, products, errorMsg) {
+    tableBody.innerHTML = '';
+    
+    if (products.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-gray-500">${errorMsg || 'Tidak ada produk ditemukan.'}</td></tr>`;
+        return;
+    }
+    
+    products.forEach((product, idx) => {
+        // Pastikan product tidak null dan memiliki field yang dibutuhkan
+        if (!product || typeof product !== 'object') return;
+        
+        const row = document.createElement('tr');
+        row.className = 'border-b border-gray-200 hover:bg-gray-50';
+        row.setAttribute('data-product-id', product._id || product.id || '');
+        
+        // Handle image URL - pastikan menggunakan full URL jika relative
+        let imageUrl = product.image_url || product.image || 'https://via.placeholder.com/50';
+        if (imageUrl && imageUrl.startsWith('/uploads')) {
+            imageUrl = `http://localhost:5000${imageUrl}`;
+        }
+        
+        row.innerHTML = `
+            <td class="py-3 px-4 text-sm">${idx + 1}</td>
+            <td class="py-3 px-4">
+                <img src="${imageUrl}" class="w-12 h-12 object-cover rounded" alt="Product" onerror="this.src='https://via.placeholder.com/50'">
+            </td>
+            <td class="py-3 px-4 text-sm font-medium">${product.name || '-'}</td>
+            <td class="py-3 px-4 text-sm">${product.category || '-'}</td>
+            <td class="py-3 px-4 text-sm">Rp ${product.price ? parseInt(product.price).toLocaleString('id-ID') : '-'}</td>
+            <td class="py-3 px-4 text-sm">${product.stock ?? '-'}</td>
+            <td class="py-3 px-4">
+                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Aktif</span>
+            </td>
+            <td class="py-3 px-4">
+                <button onclick="editProduct('${product._id || product.id || ''}')" class="text-blue-600 hover:text-blue-800 mr-2" title="Edit Produk">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="confirmDeleteProduct('${product._id || product.id || ''}', '${(product.name || 'Produk').replace(/'/g, '\\\'')}')" class="text-red-600 hover:text-red-800" title="Hapus Produk">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
 }
 
 // Setup periodic backend status check
@@ -228,7 +302,8 @@ function showPage(pageId) {
         
         // Load data when switching to products page
         if (pageId === 'products' && typeof apiService !== 'undefined') {
-            setTimeout(() => apiService.loadProductsTable(), 100);
+            // Gunakan loadDashboardData untuk konsistensi
+            setTimeout(() => loadDashboardData(), 100);
         }
     }
     
@@ -314,10 +389,19 @@ function uploadProductImageWrapper() {
 // Refresh products data
 async function refreshProducts() {
     if (typeof apiService !== 'undefined') {
-        await apiService.loadProductsTable();
-        apiService.showNotification('Data produk berhasil di-refresh', 'success');
+        // Clear cache and force refresh
+        if (apiService.clearProductsCache) {
+            apiService.clearProductsCache();
+        }
+        await loadDashboardData();
+        if (apiService.showNotification) {
+            apiService.showNotification('Data produk berhasil di-refresh', 'success');
+        } else {
+            showAlert('Data produk berhasil di-refresh', 'success');
+        }
     } else {
         console.error('API Service not available');
+        showAlert('API Service tidak tersedia', 'error');
     }
 }
 
@@ -751,6 +835,29 @@ window.updateOrderStatus = updateOrderStatus;
 window.viewCustomer = viewCustomer;
 window.editCustomer = editCustomer;
 
+// Import functions from api-service.js
+window.editProduct = window.editProduct || function(id) { 
+    if (typeof apiService !== 'undefined' && apiService.editProduct) {
+        return apiService.editProduct(id);
+    } else {
+        console.error('editProduct function not available');
+    }
+};
+
+window.confirmDeleteProduct = window.confirmDeleteProduct || function(id, name) {
+    if (confirm(`Apakah Anda yakin ingin menghapus produk "${name}"?`)) {
+        if (typeof apiService !== 'undefined' && apiService.deleteProduct) {
+            apiService.deleteProduct(id).then(success => {
+                if (success) {
+                    loadDashboardData(); // Refresh table
+                }
+            });
+        } else {
+            console.error('deleteProduct function not available');
+        }
+    }
+};
+
 // Testing functions
 window.testShowUsers = async function() {
     try {
@@ -794,3 +901,5 @@ document.addEventListener('click', function(e) {
         closeAddProductModal();
     }
 });
+
+console.log('📦 Produk dari backend:', products);

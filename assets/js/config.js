@@ -14,6 +14,11 @@ function detectBackendConfig() {
     };
 }
 
+// Configuration helper
+window.apiConfig = {
+    baseUrl: 'http://localhost:5000/api'
+};
+
 // Backend configuration
 const BACKEND_CONFIG = {
     ...detectBackendConfig(),

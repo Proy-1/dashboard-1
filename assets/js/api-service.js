@@ -4,14 +4,28 @@
 ======================================== */
 
 class APIService {
+    // Helper: Ambil token Paseto dari localStorage
+    getPasetoToken() {
+        return localStorage.getItem('paseto_token');
+    }
+
+    // Helper: Hapus token Paseto dari localStorage
+    removePasetoToken() {
+        localStorage.removeItem('paseto_token');
+    }
     constructor() {
         // Use configuration from config.js
-        this.baseURL = window.BACKEND_CONFIG?.host || `http://localhost:8000`;
+        this.baseURL = window.BACKEND_CONFIG?.host || `http://localhost:5000`;
         this.config = window.BACKEND_CONFIG || {};
         this.endpoints = window.API_ENDPOINTS || {};
         
         this.isConnected = false;
         this.initialized = false;
+        
+        // Add simple cache for products
+        this.productsCache = null;
+        this.cacheTimestamp = null;
+        this.cacheTimeout = 30000; // 30 seconds
         
         // Prevent multiple initialization
         if (window.apiServiceInstance) {
@@ -118,26 +132,72 @@ class APIService {
     ======================================== */
 
     // GET: Ambil semua produk
-    async getProducts() {
+    async getProducts(forceRefresh = false) {
+        // Check cache first (unless force refresh is requested)
+        if (!forceRefresh && this.productsCache && this.cacheTimestamp) {
+            const now = Date.now();
+            if (now - this.cacheTimestamp < this.cacheTimeout) {
+                console.log('📦 Products loaded from cache:', this.productsCache.length);
+                return this.productsCache;
+            }
+        }
+        
         try {
-            const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCTS}`);
+            const token = this.getPasetoToken();
+            const headers = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCTS}`, { headers });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const products = await response.json();
-            console.log('📦 Products loaded:', products.length);
+            const data = await response.json();
+            
+            // Handle different response formats from backend
+            let products = [];
+            if (Array.isArray(data)) {
+                products = data;
+            } else if (data && Array.isArray(data.products)) {
+                products = data.products;
+            } else if (data && Array.isArray(data.data)) {
+                products = data.data;
+            } else {
+                console.warn('Unexpected response format:', data);
+                products = [];
+            }
+            
+            // Update cache
+            this.productsCache = products;
+            this.cacheTimestamp = Date.now();
+            
+            console.log('📦 Products loaded from backend:', products.length);
             return products;
         } catch (error) {
             console.error('Error fetching products:', error);
-            this.showNotification(this.errors.NETWORK_ERROR || 'Error mengambil data produk', 'error');
+            this.showNotification(this.errors?.NETWORK_ERROR || 'Error mengambil data produk', 'error');
+            
+            // Return cached data if available, otherwise empty array
+            if (this.productsCache) {
+                console.log('📦 Returning cached products due to error');
+                return this.productsCache;
+            }
             return [];
         }
+    }
+    
+    // Helper: Clear products cache
+    clearProductsCache() {
+        this.productsCache = null;
+        this.cacheTimestamp = null;
+        console.log('🗑️ Products cache cleared');
     }
 
     // GET: Ambil satu produk berdasarkan ID
     async getProduct(productId) {
         try {
-            const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCT_BY_ID(productId)}`);
+            const token = this.getPasetoToken();
+            const headers = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCT_BY_ID(productId)}`, { headers });
             if (!response.ok) {
                 if (response.status === 404) {
                     return null;
@@ -156,11 +216,12 @@ class APIService {
     // POST: Tambah produk baru
     async createProduct(productData) {
         try {
+            const token = this.getPasetoToken();
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCTS}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers,
                 body: JSON.stringify(productData)
             });
 
@@ -173,6 +234,10 @@ class APIService {
             }
 
             this.showNotification('Produk berhasil ditambahkan', 'success');
+            
+            // Clear cache after creating product
+            this.clearProductsCache();
+            
             return result;
         } catch (error) {
             console.error('Error creating product:', error);
@@ -184,11 +249,12 @@ class APIService {
     // PUT: Update produk
     async updateProduct(productId, productData) {
         try {
+            const token = this.getPasetoToken();
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCT_BY_ID(productId)}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers,
                 body: JSON.stringify(productData)
             });
             if (!response.ok) {
@@ -196,6 +262,10 @@ class APIService {
             }
             const updatedProduct = await response.json();
             this.showNotification('Produk berhasil diperbarui', 'success');
+            
+            // Clear cache after updating product
+            this.clearProductsCache();
+            
             return updatedProduct;
         } catch (error) {
             console.error('Error updating product:', error);
@@ -207,8 +277,12 @@ class APIService {
     // DELETE: Hapus produk
     async deleteProduct(productId) {
         try {
+            const token = this.getPasetoToken();
+            const headers = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const response = await fetch(`${this.baseURL}${this.endpoints.PRODUCT_BY_ID(productId)}`, {
                 method: 'DELETE',
+                headers
             });
 
             const result = await response.json();
@@ -220,6 +294,10 @@ class APIService {
             }
 
             this.showNotification(result.message || 'Produk berhasil dihapus', 'success');
+            
+            // Clear cache after deleting product
+            this.clearProductsCache();
+            
             return true;
         } catch (error) {
             console.error('Error deleting product:', error);
@@ -231,8 +309,12 @@ class APIService {
     // POST: Upload gambar
     async uploadImage(formData) {
         try {
+            const token = this.getPasetoToken();
+            const headers = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const response = await fetch(`${this.baseURL}${this.endpoints.UPLOAD}`, {
                 method: 'POST',
+                headers,
                 body: formData
             });
 
@@ -282,6 +364,11 @@ class APIService {
                 throw new Error(errorMessage);
             }
 
+            // Simpan token Paseto jika ada
+            if (data.token) {
+                localStorage.setItem('paseto_token', data.token);
+            }
+
             // Success response from Golang backend
             console.log('✅ Login successful');
             return { 
@@ -298,11 +385,12 @@ class APIService {
     // POST: Register admin
     async registerAdmin(adminData) {
         try {
+            const token = this.getPasetoToken();
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const response = await fetch(`${this.baseURL}${this.endpoints.REGISTER}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers,
                 body: JSON.stringify(adminData)
             });
 
@@ -333,7 +421,10 @@ class APIService {
     // ADMIN: GET semua admin
     async getAdmins() {
         try {
-            const response = await fetch(`${this.baseURL}${this.endpoints.ADMINS}`);
+            const token = this.getPasetoToken();
+            const headers = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const response = await fetch(`${this.baseURL}${this.endpoints.ADMINS}`, { headers });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -349,11 +440,12 @@ class APIService {
     // ADMIN: Tambah admin baru
     async createAdmin(adminData) {
         try {
+            const token = this.getPasetoToken();
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const response = await fetch(`${this.baseURL}${this.endpoints.ADMINS}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers,
                 body: JSON.stringify(adminData)
             });
             if (!response.ok) {
@@ -372,8 +464,12 @@ class APIService {
     // ADMIN: Hapus admin
     async deleteAdmin(adminId) {
         try {
+            const token = this.getPasetoToken();
+            const headers = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
             const response = await fetch(`${this.baseURL}${this.endpoints.ADMIN_BY_ID(adminId)}`, {
                 method: 'DELETE',
+                headers
             });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -487,8 +583,11 @@ class APIService {
 
     // Load dan tampilkan produk di tabel
     async loadProductsTable() {
-        const tbody = document.getElementById('products-table-body');
-        if (!tbody) return;
+        const tbody = document.getElementById('productsTableBody') || document.getElementById('products-table-body');
+        if (!tbody) {
+            console.warn('Table body not found. Looking for productsTableBody or products-table-body');
+            return;
+        }
 
         // Show loading
         tbody.innerHTML = `
@@ -518,39 +617,37 @@ class APIService {
         }
 
         // Render products
-        tbody.innerHTML = products.map((product, index) => `
-            <tr class="hover:bg-gray-50 transition-colors">
-                <td class="text-center font-medium">${index + 1}</td>
-                <td>
-                    <div class="flex items-center">
-                        ${product.image_url ? 
-                            `<img src="${this.baseURL.replace('/api', '')}${product.image_url}" alt="${product.name}" class="w-12 h-12 object-cover rounded-lg mr-3">` :
-                            `<div class="w-12 h-12 bg-gray-200 rounded-lg mr-3 flex items-center justify-center">
-                                <i class="fas fa-image text-gray-400"></i>
-                            </div>`
-                        }
-                        <div>
-                            <div class="font-medium text-gray-900">${product.name}</div>
-                            <div class="text-sm text-gray-500 text-truncate max-w-48">${product.description}</div>
-                        </div>
-                    </div>
+        tbody.innerHTML = products.map((product, index) => {
+            // Handle image URL - pastikan menggunakan full URL jika relative
+            let imageUrl = product.image_url || product.image || 'https://via.placeholder.com/50';
+            if (imageUrl && imageUrl.startsWith('/uploads')) {
+                imageUrl = `http://localhost:5000${imageUrl}`;
+            }
+            
+            return `
+            <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4 text-sm text-center font-medium">${index + 1}</td>
+                <td class="py-3 px-4">
+                    <img src="${imageUrl}" alt="${product.name || 'Product'}" class="w-12 h-12 object-cover rounded" onerror="this.src='https://via.placeholder.com/50'">
                 </td>
-                <td class="font-medium text-green-600">${this.formatPrice(product.price)}</td>
-                <td>
-                    <span class="badge badge-success">Aktif</span>
+                <td class="py-3 px-4 text-sm font-medium">${product.name || '-'}</td>
+                <td class="py-3 px-4 text-sm">${product.category || '-'}</td>
+                <td class="py-3 px-4 text-sm font-medium text-green-600">Rp ${product.price ? parseInt(product.price).toLocaleString('id-ID') : '-'}</td>
+                <td class="py-3 px-4 text-sm">${product.stock ?? '-'}</td>
+                <td class="py-3 px-4">
+                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Aktif</span>
                 </td>
-                <td class="text-center">
-                    <div class="flex justify-center space-x-2">
-                        <button onclick="editProduct('${product._id}')" class="btn btn-sm bg-blue-500 text-white hover:bg-blue-600">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="confirmDeleteProduct('${product._id}', '${product.name}')" class="btn btn-sm bg-red-500 text-white hover:bg-red-600">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
+                <td class="py-3 px-4 text-center">
+                    <button onclick="editProduct('${product._id || product.id}')" class="text-blue-600 hover:text-blue-800 mr-2" title="Edit Produk">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="confirmDeleteProduct('${product._id || product.id}', '${(product.name || 'Produk').replace(/'/g, '\\\'')}')" class="text-red-600 hover:text-red-800" title="Hapus Produk">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
 
         // Update dashboard stats
         this.updateDashboardStats(products);
@@ -851,12 +948,27 @@ async function uploadProductImage() {
             if (result && result.success && result.image_url) {
                 document.getElementById('product-image-url').value = result.image_url;
                 console.log('✅ Image uploaded successfully:', result.image_url);
+                
+                // Show success notification
+                if (typeof apiService !== 'undefined' && apiService.showNotification) {
+                    apiService.showNotification('Gambar produk berhasil diupload!', 'success');
+                } else {
+                    alert('Gambar produk berhasil diupload!');
+                }
+                
                 if (result.file_size) {
                     console.log('📏 File size:', result.file_size);
                 }
                 return true;
             } else {
                 console.error('❌ Upload failed:', result ? result.message : 'No result');
+                
+                // Show error notification
+                if (typeof apiService !== 'undefined' && apiService.showNotification) {
+                    apiService.showNotification('Gagal mengupload gambar: ' + (result ? result.message : 'Unknown error'), 'error');
+                } else {
+                    alert('Gagal mengupload gambar: ' + (result ? result.message : 'Unknown error'));
+                }
                 return false;
             }
         } else {
