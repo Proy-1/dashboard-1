@@ -618,10 +618,12 @@ class APIService {
 
         // Render products
         tbody.innerHTML = products.map((product, index) => {
-            // Gunakan image_base64 jika ada
-            let imageSrc = product.image_base64 || '';
-            if (!imageSrc) {
-                imageSrc = '/assets/img/no-image.png';
+            // Hanya tampilkan gambar jika image_base64 ada, jangan gunakan file lokal
+            let imageHTML = '';
+            if (product.image_base64 && product.image_base64.trim() !== '') {
+                imageHTML = `<img src="${product.image_base64}" alt="${product.name || 'Product'}" class="w-12 h-12 object-cover rounded">`;
+            } else {
+                imageHTML = `<div class="w-12 h-12 flex items-center justify-center bg-gray-200 rounded border text-gray-500"><i class="fas fa-image"></i></div>`;
             }
             // Escape single quotes in product name for JS string
             const safeName = (product.name || 'Produk').replace(/'/g, "\\'");
@@ -629,7 +631,7 @@ class APIService {
             <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                 <td class="py-3 px-4 text-sm text-center font-medium">${index + 1}</td>
                 <td class="py-3 px-4">
-                    <img src="${imageSrc}" alt="${product.name || 'Product'}" class="w-12 h-12 object-cover rounded" onerror="this.src='/assets/img/no-image.png'">
+                    ${imageHTML}
                 </td>
                 <td class="py-3 px-4 text-sm font-medium">${product.name || '-'}</td>
                 <td class="py-3 px-4 text-sm">${product.category || '-'}</td>

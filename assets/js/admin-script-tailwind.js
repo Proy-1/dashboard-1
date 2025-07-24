@@ -1,20 +1,4 @@
-    // Preview image on file input change
-    const fileInput = document.getElementById('product-image');
-    const previewImg = document.getElementById('product-image-preview');
-    if (fileInput && previewImg) {
-        fileInput.onchange = function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    previewImg.src = ev.target.result;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                previewImg.src = '/assets/img/no-image.png';
-            }
-        };
-    }
+    // File input preview sudah dihandle di index.html dengan placeholder HTML
 // Admin Dashboard JavaScript
 // Integrated with Backend API Service
 
@@ -190,12 +174,17 @@ function renderProductsTable(tableBody, products, errorMsg) {
         row.className = 'border-b border-gray-200 hover:bg-gray-50';
         row.setAttribute('data-product-id', product._id || product.id || '');
         
-        // Handle image URL - pastikan menggunakan full URL jika relative
-        let imageSrc = product.image_base64 || '/assets/img/no-image.png';
+        // Handle image - hanya tampilkan jika image_base64 ada, bukan file lokal
+        let imageHTML = '';
+        if (product.image_base64 && product.image_base64.trim() !== '') {
+            imageHTML = `<img src="${product.image_base64}" class="w-12 h-12 object-cover rounded" alt="Product">`;
+        } else {
+            imageHTML = `<div class="w-12 h-12 flex items-center justify-center bg-gray-200 rounded border text-gray-500"><i class="fas fa-image"></i></div>`;
+        }
         row.innerHTML = `
             <td class="py-3 px-4 text-sm">${idx + 1}</td>
             <td class="py-3 px-4">
-                <img src="${imageSrc}" class="w-12 h-12 object-cover rounded" alt="Product" onerror="this.src='/assets/img/no-image.png'">
+                ${imageHTML}
             </td>
             <td class="py-3 px-4 text-sm font-medium">${product.name || '-'}</td>
             <td class="py-3 px-4 text-sm">${product.category || '-'}</td>
@@ -362,9 +351,11 @@ function showAddProductModal() {
     document.getElementById('product-id').value = '';
     document.getElementById('product-image-url').value = '';
     document.getElementById('modal-title').textContent = 'Tambah Produk Baru';
-    // Set preview image
-    const previewImg = document.getElementById('product-image-preview');
-    if (previewImg) previewImg.src = '/assets/img/no-image.png';
+    // Set preview image - gunakan placeholder HTML jika tidak ada gambar
+    const previewContainer = document.getElementById('product-image-preview-container');
+    if (previewContainer) {
+        previewContainer.innerHTML = `<div class="w-20 h-20 flex items-center justify-center bg-gray-200 rounded border mt-1 text-gray-500"><i class="fas fa-image fa-2x"></i><br><span style="font-size:0.8rem;">Tidak ada gambar</span></div>`;
+    }
     // Show modal
     showModal('productModal');
 }
