@@ -232,10 +232,10 @@ function renderProductsTable(products) {
                 ${productStock}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button onclick="editProduct('${product.id}')" class="text-blue-600 hover:text-blue-900 mr-3">
+                <button onclick="editProduct('${product.id}')" class="text-blue-600 hover:text-blue-900 mr-3" data-product-id="${product.id}">
                     <i class="fas fa-edit"></i> Edit
                 </button>
-                <button onclick="deleteProduct('${product.id}')" class="text-red-600 hover:text-red-900">
+                <button onclick="deleteProduct('${product.id}')" class="text-red-600 hover:text-red-900" data-product-id="${product.id}">
                     <i class="fas fa-trash"></i> Hapus
                 </button>
             </td>
@@ -270,11 +270,8 @@ function closeProductModal() {
 
 async function loadProductData(productId) {
     try {
-        console.log('Loading product data for ID:', productId);
         const response = await api.getProduct(productId);
         const product = response.product;
-        
-        console.log('Product data received:', product);
         
         document.getElementById('productId').value = product.id || '';
         document.getElementById('productName').value = product.name || '';
@@ -283,11 +280,9 @@ async function loadProductData(productId) {
         document.getElementById('productStock').value = product.stock || 0;
         document.getElementById('productCategory').value = product.category || '';
         
-        // Show current image - prioritas image_url, fallback ke image jika diperlukan
-        const imageUrl = product.image_url || product.image;
-        console.log('Image URL for edit:', imageUrl);
-        
-        if (imageUrl && imageUrl.trim() !== '') {
+        // Show current image - gunakan image_url dari Cloudinary
+        const imageUrl = product.image_url;
+        if (imageUrl && imageUrl.trim() !== '' && imageUrl !== 'undefined' && imageUrl !== 'null') {
             document.getElementById('currentImage').src = imageUrl;
             document.getElementById('currentImagePreview').classList.remove('hidden');
         } else {
