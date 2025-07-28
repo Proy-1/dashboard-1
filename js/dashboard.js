@@ -63,6 +63,7 @@ function setupEventListeners() {
     
     // Product management
     document.getElementById('addProductBtn').addEventListener('click', openProductModal);
+    document.getElementById('cleanupBtn').addEventListener('click', cleanupEmptyProducts);
     document.getElementById('closeProductModal').addEventListener('click', closeProductModal);
     document.getElementById('cancelProductBtn').addEventListener('click', closeProductModal);
     document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
@@ -293,6 +294,50 @@ async function loadProductData(productId) {
     }
 }
 
+async function cleanupEmptyProducts() {
+    try {
+        if (!confirm('Apakah Anda yakin ingin menghapus semua produk kosong (tanpa nama)?')) {
+            return;
+        }
+
+        // Get all products
+        const response = await api.getProducts();
+        const products = response.products || [];
+        
+        // Find empty products (no name or empty name)
+        const emptyProducts = products.filter(product => 
+            !product.name || product.name.trim() === '' || product.name.trim() === 'undefined'
+        );
+        
+        if (emptyProducts.length === 0) {
+            api.showNotification('Tidak ada produk kosong yang ditemukan', 'info');
+            return;
+        }
+        
+        // Delete empty products
+        let deletedCount = 0;
+        for (const product of emptyProducts) {
+            try {
+                await api.deleteProduct(product.id);
+                deletedCount++;
+            } catch (error) {
+                console.error('Error deleting product:', product.id, error);
+            }
+        }
+        
+        if (deletedCount > 0) {
+            api.showNotification(`Berhasil menghapus ${deletedCount} produk kosong`, 'success');
+            loadProducts(); // Reload the products table
+        } else {
+            api.showNotification('Gagal menghapus produk kosong', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error cleaning up products:', error);
+        api.showNotification('Terjadi kesalahan saat membersihkan produk', 'error');
+    }
+}
+
 async function handleProductSubmit(e) {
     e.preventDefault();
     
@@ -309,11 +354,11 @@ async function handleProductSubmit(e) {
     
     try {
         const productData = {
-            name: formData.get('productName'),
-            price: parseFloat(formData.get('productPrice')),
-            description: formData.get('productDescription'),
-            stock: parseInt(formData.get('productStock')),
-            category: formData.get('productCategory')
+            name: formData.get('name'),
+            price: parseFloat(formData.get('price')),
+            description: formData.get('description'),
+            stock: parseInt(formData.get('stock')),
+            category: formData.get('category')
         };
         
         // Handle image upload
