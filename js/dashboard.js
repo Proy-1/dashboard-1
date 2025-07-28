@@ -204,8 +204,8 @@ function renderProductsTable(products) {
     }
     
     tbody.innerHTML = products.map(product => {
-        // Handle different image field names from backend
-        const imageUrl = product.image_base64 || product.imageBase64 || product.image_url || product.imageURL;
+        // Prioritas: image_url (Cloudinary URL) untuk display
+        const imageUrl = product.image_url;
         const productName = product.name || 'Produk Tanpa Nama';
         const productCategory = product.category || 'Tanpa Kategori';
         const productPrice = product.price || 0;
@@ -280,9 +280,9 @@ async function loadProductData(productId) {
         document.getElementById('productStock').value = product.stock || 0;
         document.getElementById('productCategory').value = product.category || '';
         
-        // Show current image if exists - check multiple possible field names
-        const imageUrl = product.image_base64 || product.imageBase64 || product.image_url || product.imageURL;
-        if (imageUrl) {
+        // Show current image if exists - prioritas image_url (Cloudinary URL)
+        const imageUrl = product.image_url;
+        if (imageUrl && imageUrl.trim() !== '') {
             document.getElementById('currentImage').src = imageUrl;
             document.getElementById('currentImagePreview').classList.remove('hidden');
         } else {
@@ -353,6 +353,7 @@ async function handleProductSubmit(e) {
     saveBtn.disabled = true;
     
     try {
+        // Format data sesuai dengan backend requirements
         const productData = {
             name: formData.get('name'),
             price: parseFloat(formData.get('price')),
@@ -361,11 +362,11 @@ async function handleProductSubmit(e) {
             category: formData.get('category')
         };
         
-        // Handle image upload
+        // Handle image upload - kirim sebagai image_base64 untuk backend processing
         const imageFile = document.getElementById('productImage').files[0];
         if (imageFile) {
             const imageBase64 = await api.fileToBase64(imageFile);
-            productData.image_base64 = imageBase64;
+            productData.image_base64 = imageBase64; // Backend akan convert ini ke image_url
         }
         
         const productId = document.getElementById('productId').value;
