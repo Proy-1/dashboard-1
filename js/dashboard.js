@@ -270,8 +270,11 @@ function closeProductModal() {
 
 async function loadProductData(productId) {
     try {
+        console.log('Loading product data for ID:', productId);
         const response = await api.getProduct(productId);
         const product = response.product;
+        
+        console.log('Product data received:', product);
         
         document.getElementById('productId').value = product.id || '';
         document.getElementById('productName').value = product.name || '';
@@ -280,8 +283,10 @@ async function loadProductData(productId) {
         document.getElementById('productStock').value = product.stock || 0;
         document.getElementById('productCategory').value = product.category || '';
         
-        // Show current image if exists - prioritas image_url (Cloudinary URL)
-        const imageUrl = product.image_url;
+        // Show current image - prioritas image_url, fallback ke image jika diperlukan
+        const imageUrl = product.image_url || product.image;
+        console.log('Image URL for edit:', imageUrl);
+        
         if (imageUrl && imageUrl.trim() !== '') {
             document.getElementById('currentImage').src = imageUrl;
             document.getElementById('currentImagePreview').classList.remove('hidden');
