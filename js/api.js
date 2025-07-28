@@ -136,7 +136,20 @@ class APIService {
     }
 
     async getProduct(id) {
-        return await this.fetch(`/products/${id}`);
+        if (!id || id.trim() === '') {
+            throw new Error('Product ID is required');
+        }
+        
+        try {
+            const response = await this.fetch(`/products/${id}`);
+            if (!response || !response.product) {
+                throw new Error('Product not found');
+            }
+            return response;
+        } catch (error) {
+            console.error(`Failed to get product ${id}:`, error);
+            throw error;
+        }
     }
 
     async createProduct(productData) {
