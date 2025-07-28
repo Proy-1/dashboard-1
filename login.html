@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - E-Commerce Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-500 to-purple-600 min-h-screen flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+            <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-store text-blue-600 text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Login Admin</h1>
+            <p class="text-gray-600 mt-2">Masuk ke dashboard e-commerce</p>
+        </div>
+
+        <!-- Connection Status -->
+        <div id="connectionStatus" class="mb-4 p-3 rounded-lg text-center text-sm">
+            <i class="fas fa-circle text-yellow-500 mr-2"></i>
+            <span>Menghubungkan ke server...</span>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-user mr-2"></i>Username
+                </label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Masukkan username"
+                >
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-lock mr-2"></i>Password
+                </label>
+                <div class="relative">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                        placeholder="Masukkan password"
+                    >
+                    <button 
+                        type="button" 
+                        id="togglePassword" 
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    >
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button 
+                type="submit" 
+                id="loginBtn"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
+            >
+                <span class="btn-text">Masuk</span>
+                <div class="loading hidden ml-2"></div>
+            </button>
+        </form>
+
+        <!-- Register Link -->
+        <div class="text-center mt-6">
+            <p class="text-gray-600">
+                Belum punya akun admin? 
+                <a href="register.html" class="text-blue-600 hover:text-blue-700 font-medium">Daftar di sini</a>
+            </p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <span id="errorText"></span>
+        </div>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="hidden mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span id="successText"></span>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        // DOM Elements
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        // Check backend connection on page load
+        window.addEventListener('DOMContentLoaded', checkConnection);
+
+        // Toggle password visibility
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+
+        // Login form submit
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            await login(username, password);
+        });
+
+        // Check backend connection
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'ok') {
+                        showConnectionStatus('connected', 'Terhubung ke server', 'green');
+                    } else {
+                        showConnectionStatus('error', 'Server bermasalah', 'red');
+                    }
+                } else {
+                    throw new Error('Server response not ok');
+                }
+            } catch (error) {
+                console.error('Connection error:', error);
+                showConnectionStatus('disconnected', 'Tidak dapat terhubung ke server', 'red');
+            }
+        }
+
+        // Show connection status
+        function showConnectionStatus(status, message, color) {
+            const statusEl = connectionStatus;
+            statusEl.className = `mb-4 p-3 rounded-lg text-center text-sm bg-${color}-100 border border-${color}-400 text-${color}-700`;
+            
+            const iconClass = status === 'connected' ? 'fa-check-circle' : 
+                            status === 'error' ? 'fa-exclamation-triangle' : 'fa-times-circle';
+            
+            statusEl.innerHTML = `<i class="fas ${iconClass} mr-2"></i><span>${message}</span>`;
+        }
+
+        // Login function
+        async function login(username, password) {
+            // Show loading
+            setLoading(true);
+            hideMessages();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Login successful
+                    localStorage.setItem('admin_token', data.token);
+                    localStorage.setItem('admin_data', JSON.stringify(data.admin));
+                    
+                    showSuccess('Login berhasil! Mengalihkan ke dashboard...');
+                    
+                    // Redirect after 1 second
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    // Login failed
+                    showError(data.error || 'Login gagal. Periksa username dan password Anda.');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Show loading state
+        function setLoading(loading) {
+            const btnText = loginBtn.querySelector('.btn-text');
+            const loadingSpinner = loginBtn.querySelector('.loading');
+            
+            if (loading) {
+                btnText.textContent = 'Memproses...';
+                loadingSpinner.classList.remove('hidden');
+                loginBtn.disabled = true;
+                loginBtn.classList.add('opacity-75');
+            } else {
+                btnText.textContent = 'Masuk';
+                loadingSpinner.classList.add('hidden');
+                loginBtn.disabled = false;
+                loginBtn.classList.remove('opacity-75');
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            errorMessage.classList.remove('hidden');
+            successMessage.classList.add('hidden');
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            document.getElementById('successText').textContent = message;
+            successMessage.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+        }
+
+        // Hide all messages
+        function hideMessages() {
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
+        }
+
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('admin_token');
+            if (token) {
+                // Already logged in, redirect to dashboard
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
