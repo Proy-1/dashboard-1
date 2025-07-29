@@ -371,20 +371,61 @@ async function handleProductSubmit(e) {
         // Handle image upload - kirim sebagai image_base64 untuk backend processing
         const imageFile = document.getElementById('productImage').files[0];
         if (imageFile) {
-            const imageBase64 = await api.fileToBase64(imageFile);
-            productData.image_base64 = imageBase64; // Backend akan convert ini ke image_url
+            // Validasi ukuran file (max 5MB)
+            if (imageFile.size > 5 * 1024 * 1024) {
+                throw new Error('Ukuran file terlalu besar. Maksimal 5MB.');
+            }
+            
+            // Validasi tipe file
+            if (!imageFile.type.startsWith('image/')) {
+                throw new Error('File harus berupa gambar.');
+            }
+            
+            try {
+                const imageBase64 = await api.fileToBase64(imageFile);
+                // Pastikan format base64 benar
+                if (imageBase64 && imageBase64.startsWith('data:image/')) {
+                    productData.image_base64 = imageBase64;
+                } else {
+                    throw new Error('Format gambar tidak valid.');
+                }
+            } catch (error) {
+                throw new Error('Gagal memproses gambar: ' + error.message);
+            }
         }
         
         const productId = document.getElementById('productId').value;
         
         if (productId) {
             // Update existing product
-            await api.updateProduct(productId, productData);
-            api.showNotification('Produk berhasil diperbarui', 'success');
+            try {
+                await api.updateProduct(productId, productData);
+                api.showNotification('Produk berhasil diperbarui', 'success');
+            } catch (error) {
+                // Jika error karena gambar, coba simpan tanpa gambar
+                if (error.message.includes('Cloudinary') || error.message.includes('image')) {
+                    delete productData.image_base64;
+                    await api.updateProduct(productId, productData);
+                    api.showNotification('Produk diperbarui tanpa gambar (error upload foto)', 'warning');
+                } else {
+                    throw error;
+                }
+            }
         } else {
             // Create new product
-            await api.createProduct(productData);
-            api.showNotification('Produk berhasil ditambahkan', 'success');
+            try {
+                await api.createProduct(productData);
+                api.showNotification('Produk berhasil ditambahkan', 'success');
+            } catch (error) {
+                // Jika error karena gambar, coba simpan tanpa gambar
+                if (error.message.includes('Cloudinary') || error.message.includes('image')) {
+                    delete productData.image_base64;
+                    await api.createProduct(productData);
+                    api.showNotification('Produk ditambahkan tanpa gambar (error upload foto)', 'warning');
+                } else {
+                    throw error;
+                }
+            }
         }
         
         closeProductModal();
@@ -393,7 +434,23 @@ async function handleProductSubmit(e) {
         
     } catch (error) {
         console.error('Error saving product:', error);
-        api.showNotification(error.message || 'Gagal menyimpan produk', 'error');
+        
+        // Berikan pesan error yang lebih spesifik
+        let errorMessage = 'Gagal menyimpan produk';
+        
+        if (error.message.includes('Cloudinary')) {
+            errorMessage = 'Gagal upload gambar. Periksa koneksi internet atau coba gambar lain.';
+        } else if (error.message.includes('ukuran')) {
+            errorMessage = error.message;
+        } else if (error.message.includes('Format')) {
+            errorMessage = error.message;
+        } else if (error.message.includes('500')) {
+            errorMessage = 'Server error. Periksa konfigurasi backend.';
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        api.showNotification(errorMessage, 'error');
     } finally {
         // Hide loading
         btnText.textContent = 'Simpan';

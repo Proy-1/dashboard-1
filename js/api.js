@@ -75,7 +75,18 @@ class APIService {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP ${response.status}`);
+                let errorMessage = errorData.error || `HTTP ${response.status}`;
+                
+                // Handle specific errors
+                if (response.status === 500 && errorMessage.includes('cloudinary')) {
+                    errorMessage = 'Gagal upload gambar ke Cloudinary. Periksa konfigurasi atau coba gambar lain.';
+                } else if (response.status === 413) {
+                    errorMessage = 'File terlalu besar. Maksimal 5MB.';
+                } else if (response.status === 400 && errorMessage.includes('image')) {
+                    errorMessage = 'Format gambar tidak didukung. Gunakan JPG, PNG, atau GIF.';
+                }
+                
+                throw new Error(errorMessage);
             }
 
             return await response.json();
@@ -233,10 +244,53 @@ class APIService {
     // Convert file to base64 for Cloudinary upload
     async fileToBase64(file) {
         return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
+            // Resize image if too large
+            if (file.size > 1024 * 1024) { // 1MB
+                this.compressImage(file).then(compressedFile => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(compressedFile);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                }).catch(error => {
+                    // Fallback to original file if compression fails
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+            } else {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            }
+        });
+    }
+
+    // Compress image to reduce file size
+    async compressImage(file, maxWidth = 800, quality = 0.8) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+                // Calculate new dimensions
+                let { width, height } = img;
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Draw and compress
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob(resolve, file.type, quality);
+            };
+            
+            img.src = URL.createObjectURL(file);
         });
     }
 
