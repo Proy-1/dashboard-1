@@ -268,7 +268,7 @@ class APIService {
     }
 
     // Compress image to reduce file size
-    async compressImage(file, maxWidth = 800, quality = 0.8) {
+    async compressImage(file, maxWidth = 600, quality = 0.7) {
         return new Promise((resolve) => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');

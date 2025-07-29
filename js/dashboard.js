@@ -249,14 +249,27 @@ function openProductModal(productId = null) {
     const title = document.getElementById('productModalTitle');
     const form = document.getElementById('productForm');
     
-    // Reset form
+    // Force reset form - clear semua field
     form.reset();
+    
+    // Explicitly clear each field to prevent browser auto-fill
     document.getElementById('productId').value = '';
+    document.getElementById('productName').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('productDescription').value = '';
+    document.getElementById('productStock').value = '';
+    document.getElementById('productCategory').value = '';
+    document.getElementById('productImage').value = '';
+    
+    // Hide image preview
     document.getElementById('currentImagePreview').classList.add('hidden');
     
     if (productId) {
         title.textContent = 'Edit Produk';
-        loadProductData(productId);
+        // Wait a bit to ensure form is cleared first
+        setTimeout(() => {
+            loadProductData(productId);
+        }, 100);
     } else {
         title.textContent = 'Tambah Produk';
     }
@@ -371,9 +384,9 @@ async function handleProductSubmit(e) {
         // Handle image upload - kirim sebagai image_base64 untuk backend processing
         const imageFile = document.getElementById('productImage').files[0];
         if (imageFile) {
-            // Validasi ukuran file (max 5MB)
-            if (imageFile.size > 5 * 1024 * 1024) {
-                throw new Error('Ukuran file terlalu besar. Maksimal 5MB.');
+            // Validasi ukuran file (max 2MB untuk menghindari timeout)
+            if (imageFile.size > 2 * 1024 * 1024) {
+                throw new Error('Ukuran file terlalu besar. Maksimal 2MB.');
             }
             
             // Validasi tipe file
