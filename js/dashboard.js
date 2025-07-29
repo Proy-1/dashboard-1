@@ -62,11 +62,28 @@ function setupEventListeners() {
     });
     
     // Product management
-    document.getElementById('addProductBtn').addEventListener('click', openProductModal);
-    document.getElementById('cleanupBtn').addEventListener('click', cleanupEmptyProducts);
-    document.getElementById('closeProductModal').addEventListener('click', closeProductModal);
-    document.getElementById('cancelProductBtn').addEventListener('click', closeProductModal);
-    document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
+    try {
+        const addBtn = document.getElementById('addProductBtn');
+        if (addBtn) {
+            addBtn.addEventListener('click', () => {
+                console.log('Add Product button clicked');
+                try {
+                    openProductModal();
+                } catch (error) {
+                    console.error('Error opening modal:', error);
+                }
+            });
+        } else {
+            console.error('addProductBtn not found');
+        }
+        
+        document.getElementById('cleanupBtn').addEventListener('click', cleanupEmptyProducts);
+        document.getElementById('closeProductModal').addEventListener('click', closeProductModal);
+        document.getElementById('cancelProductBtn').addEventListener('click', closeProductModal);
+        document.getElementById('productForm').addEventListener('submit', handleProductSubmit);
+    } catch (error) {
+        console.error('Error setting up product management:', error);
+    }
     
     // Admin management
     document.getElementById('addAdminBtn').addEventListener('click', openAdminModal);
@@ -245,9 +262,16 @@ function renderProductsTable(products) {
 }
 
 function openProductModal(productId = null) {
+    console.log('openProductModal called with:', productId);
+    
     const modal = document.getElementById('productModal');
     const title = document.getElementById('productModalTitle');
     const form = document.getElementById('productForm');
+    
+    if (!modal || !title || !form) {
+        console.error('Modal elements not found');
+        return;
+    }
     
     // Force reset form - clear semua field
     form.reset();
@@ -264,24 +288,52 @@ function openProductModal(productId = null) {
     // Hide image preview
     document.getElementById('currentImagePreview').classList.add('hidden');
     
-    if (productId) {
+    if (productId && productId.trim() !== '') {
         title.textContent = 'Edit Produk';
+        console.log('Mode: Edit');
         // Wait a bit to ensure form is cleared first
         setTimeout(() => {
             loadProductData(productId);
         }, 100);
     } else {
         title.textContent = 'Tambah Produk';
+        console.log('Mode: Add');
+        // Pastikan form benar-benar kosong untuk tambah produk
+        setTimeout(() => {
+            form.reset();
+        }, 50);
     }
     
+    console.log('Opening modal...');
     modal.classList.add('modal-active');
+    
+    // Fallback - force show modal
+    modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.visibility = 'visible';
+    modal.style.zIndex = '9999';
+    
+    console.log('Modal classes:', modal.className);
+    console.log('Modal style:', modal.style.cssText);
 }
 
 function closeProductModal() {
-    document.getElementById('productModal').classList.remove('modal-active');
+    const modal = document.getElementById('productModal');
+    modal.classList.remove('modal-active');
+    // Reset style agar modal benar-benar tersembunyi
+    modal.style.display = 'none';
+    modal.style.opacity = '';
+    modal.style.visibility = '';
+    modal.style.zIndex = '';
 }
 
 async function loadProductData(productId) {
+    // Validasi productId terlebih dahulu
+    if (!productId || typeof productId !== 'string' || productId.trim() === '') {
+        console.warn('loadProductData called without valid productId');
+        return;
+    }
+    
     try {
         const response = await api.getProduct(productId);
         const product = response.product;

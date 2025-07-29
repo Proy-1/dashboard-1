@@ -147,7 +147,7 @@ class APIService {
     }
 
     async getProduct(id) {
-        if (!id || id.trim() === '') {
+        if (!id || typeof id !== 'string' || id.trim() === '') {
             throw new Error('Product ID is required');
         }
         
