@@ -436,9 +436,9 @@ async function handleProductSubmit(e) {
         // Handle image upload - kirim sebagai image_base64 untuk backend processing
         const imageFile = document.getElementById('productImage').files[0];
         if (imageFile) {
-            // Validasi ukuran file (max 2MB untuk menghindari timeout)
-            if (imageFile.size > 2 * 1024 * 1024) {
-                throw new Error('Ukuran file terlalu besar. Maksimal 2MB.');
+            // Validasi ukuran file (max 5MB untuk menghindari timeout)
+            if (imageFile.size > 5 * 1024 * 1024) {
+                throw new Error('Ukuran file terlalu besar. Maksimal 5MB.');
             }
             
             // Validasi tipe file
