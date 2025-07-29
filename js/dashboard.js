@@ -269,12 +269,9 @@ function closeProductModal() {
 }
 
 async function loadProductData(productId) {
-    console.log('loadProductData called with ID:', productId);
     try {
         const response = await api.getProduct(productId);
-        console.log('API response:', response);
         const product = response.product;
-        console.log('Product data:', product);
         
         // Isi form dengan data produk
         document.getElementById('productId').value = product.id || '';
@@ -283,8 +280,6 @@ async function loadProductData(productId) {
         document.getElementById('productDescription').value = product.description || '';
         document.getElementById('productStock').value = product.stock || 0;
         document.getElementById('productCategory').value = product.category || '';
-        
-        console.log('Form fields populated');
         
         // Show current image - gunakan image_url dari Cloudinary
         const imageUrl = product.image_url;
@@ -296,7 +291,6 @@ async function loadProductData(productId) {
         }
     } catch (error) {
         console.error('Error loading product:', error);
-        console.error('Product ID that failed:', productId);
         
         // Reset form jika terjadi error
         document.getElementById('productForm').reset();
