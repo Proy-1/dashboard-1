@@ -3,7 +3,7 @@
 
 class APIService {
     constructor() {
-        this.baseURL = 'http://localhost:5000/api';
+        this.baseURL = 'https://rifa.alwaysdata.net/api';
         this.token = localStorage.getItem('admin_token');
         this.isConnected = false;
         
