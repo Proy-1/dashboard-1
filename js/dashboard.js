@@ -1,9 +1,6 @@
 // Dashboard Main Script
 // Menggunakan API Service untuk koneksi ke backend
 
-import { addCSSInHead } from "https://cdn.jsdelivr.net/gh/jscroot/lib@0.1.6/element.js";
-import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/src/sweetalert2.js";
-
 document.addEventListener('DOMContentLoaded', function() {
     // Check authentication
     if (!api.isAuthenticated()) {
@@ -58,17 +55,8 @@ function setupEventListeners() {
     });
     
     // Logout
-    document.getElementById('logoutBtn').addEventListener('click', async function() {
-        await addCSSInHead('https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css');
-        const result = await Swal.fire({
-            title: 'Konfirmasi',
-            text: 'Apakah Anda yakin ingin logout?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, logout!',
-            cancelButtonText: 'Batal'
-        });
-        if (result.isConfirmed) {
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        if (confirm('Apakah Anda yakin ingin logout?')) {
             api.logout();
         }
     });
@@ -379,16 +367,9 @@ async function loadProductData(productId) {
 
 async function cleanupEmptyProducts() {
     try {
-        await addCSSInHead('https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css');
-const result = await Swal.fire({
-  title: 'Konfirmasi',
-  text: 'Apakah Anda yakin ingin menghapus produk ini?',
-  icon: 'warning',
-  showCancelButton: true,
-  confirmButtonText: 'Ya, hapus!',
-  cancelButtonText: 'Batal'
-});
-if (!result.isConfirmed) return;
+        if (!confirm('Apakah Anda yakin ingin menghapus semua produk kosong (tanpa nama)?')) {
+            return;
+        }
 
         // Get all products
         const response = await api.getProducts();
@@ -548,16 +529,10 @@ async function editProduct(productId) {
 }
 
 async function deleteProduct(productId) {
-    await addCSSInHead('https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css');
-    const result = await Swal.fire({
-        title: 'Konfirmasi',
-        text: 'Apakah Anda yakin ingin menghapus produk ini?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, hapus!',
-        cancelButtonText: 'Batal'
-    });
-    if (!result.isConfirmed) return;
+    if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+        return;
+    }
+    
     try {
         await api.deleteProduct(productId);
         api.showNotification('Produk berhasil dihapus', 'success');
@@ -661,16 +636,10 @@ async function handleAdminSubmit(e) {
 }
 
 async function deleteAdmin(adminId) {
-    await addCSSInHead('https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css');
-    const result = await Swal.fire({
-        title: 'Konfirmasi',
-        text: 'Apakah Anda yakin ingin menghapus admin ini?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, hapus!',
-        cancelButtonText: 'Batal'
-    });
-    if (!result.isConfirmed) return;
+    if (!confirm('Apakah Anda yakin ingin menghapus admin ini?')) {
+        return;
+    }
+    
     try {
         await api.deleteAdmin(adminId);
         api.showNotification('Admin berhasil dihapus', 'success');
