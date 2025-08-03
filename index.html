@@ -248,100 +248,108 @@
     </div>
 
     <!-- Product Modal -->
-    <div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-2 sm:mx-4 p-2 sm:p-4">
-            <div class="px-2 py-2 sm:px-6 sm:py-4 border-b">
-                <div class="flex justify-between items-center">
-                    <h3 id="productModalTitle" class="text-lg font-semibold text-gray-800">Tambah Produk</h3>
-                    <button id="closeProductModal" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-            <form id="productForm" class="px-2 py-2 sm:px-6 sm:py-4 space-y-3 sm:space-y-4" autocomplete="off">
-                <input type="hidden" id="productId" name="id">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Produk</label>
-                    <input type="text" id="productName" name="name" autocomplete="off" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Harga</label>
-                    <input type="number" id="productPrice" name="price" autocomplete="off" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                    <textarea id="productDescription" name="description" autocomplete="off" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Stok</label>
-                    <input type="number" id="productStock" name="stock" autocomplete="off" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
-                    <select id="productCategory" name="category" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Pilih Kategori</option>
-                        <option value="elektronik">Elektronik</option>
-                        <option value="fashion">Fashion</option>
-                        <option value="makanan">Makanan</option>
-                        <option value="kerajinan">Kerajinan</option>
-                        <option value="kecantikan">Kecantikan</option>
-                        <option value="lainnya">Lainnya</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Produk</label>
-                    <input type="file" id="productImage" name="image" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <div id="currentImagePreview" class="mt-2 hidden">
-                        <img id="currentImage" src="" alt="Current Image" class="w-20 h-20 object-cover rounded-md">
+    <div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-2 sm:mx-4 p-2 sm:p-4 overflow-y-auto max-h-screen flex flex-col md:flex-row">
+            <div class="flex-1 flex flex-col justify-between">
+                <div class="px-2 py-2 sm:px-6 sm:py-4 border-b md:border-b-0 md:border-r">
+                    <div class="flex justify-between items-center">
+                        <h3 id="productModalTitle" class="text-lg font-semibold text-gray-800">Tambah Produk</h3>
+                        <button id="closeProductModal" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-2 pt-2 sm:pt-4">
-                    <button type="button" id="cancelProductBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
-                        Batal
-                    </button>
-                    <button type="submit" id="saveProductBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                        <span class="btn-text">Simpan</span>
-                        <div class="loading hidden"></div>
-                    </button>
+                <form id="productForm" class="px-2 py-2 sm:px-6 sm:py-4 space-y-3 sm:space-y-4" autocomplete="off">
+                    <input type="hidden" id="productId" name="id">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Produk</label>
+                        <input type="text" id="productName" name="name" autocomplete="off" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Harga</label>
+                        <input type="number" id="productPrice" name="price" autocomplete="off" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                        <textarea id="productDescription" name="description" autocomplete="off" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    <div class="flex space-x-2">
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Stok</label>
+                            <input type="number" id="productStock" name="stock" autocomplete="off" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                            <select id="productCategory" name="category" autocomplete="off" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Pilih Kategori</option>
+                                <option value="elektronik">Elektronik</option>
+                                <option value="fashion">Fashion</option>
+                                <option value="makanan">Makanan</option>
+                                <option value="kerajinan">Kerajinan</option>
+                                <option value="kecantikan">Kecantikan</option>
+                                <option value="lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Produk</label>
+                        <input type="file" id="productImage" name="image" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-2 sm:pt-4">
+                        <button type="button" id="cancelProductBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                            Batal
+                        </button>
+                        <button type="submit" id="saveProductBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                            <span class="btn-text">Simpan</span>
+                            <div class="loading hidden"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="hidden md:flex flex-col items-center justify-center w-64 p-4">
+                <div id="currentImagePreview" class="mt-2">
+                    <img id="currentImage" src="" alt="Current Image" class="w-40 h-40 object-cover rounded-md border border-gray-200">
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
     <!-- Admin Modal -->
-    <div id="adminModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-2 sm:mx-4 p-2 sm:p-4">
-            <div class="px-2 py-2 sm:px-6 sm:py-4 border-b">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Tambah Admin</h3>
-                    <button id="closeAdminModal" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times"></i>
-                    </button>
+    <div id="adminModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-2 sm:mx-4 p-2 sm:p-4 overflow-y-auto max-h-screen flex flex-col md:flex-row">
+            <div class="flex-1 flex flex-col justify-between">
+                <div class="px-2 py-2 sm:px-6 sm:py-4 border-b md:border-b-0 md:border-r">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-800">Tambah Admin</h3>
+                        <button id="closeAdminModal" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
+                <form id="adminForm" class="px-2 py-2 sm:px-6 sm:py-4 space-y-3 sm:space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="text" id="adminUsername" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="adminEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="adminPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-2 sm:pt-4">
+                        <button type="button" id="cancelAdminBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                            Batal
+                        </button>
+                        <button type="submit" id="saveAdminBtn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                            <span class="btn-text">Simpan</span>
+                            <div class="loading hidden"></div>
+                        </button>
+                    </div>
+                </form>
             </div>
-            <form id="adminForm" class="px-2 py-2 sm:px-6 sm:py-4 space-y-3 sm:space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <input type="text" id="adminUsername" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input type="email" id="adminEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <input type="password" id="adminPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div class="flex justify-end space-x-2 pt-2 sm:pt-4">
-                    <button type="button" id="cancelAdminBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
-                        Batal
-                    </button>
-                    <button type="submit" id="saveAdminBtn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
-                        <span class="btn-text">Simpan</span>
-                        <div class="loading hidden"></div>
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 
